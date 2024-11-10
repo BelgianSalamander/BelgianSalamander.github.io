@@ -12,13 +12,14 @@ function rgbToHex(r, g, b, a) {
 }
 
 const POINT_COUNT = 400;
-const SEGMENT_COUNT = 10;
+const SEGMENT_COUNT = 20;
 const SEGMENT_FRACTION = 1 / SEGMENT_COUNT;
 
 class FourierDrawer {
     constructor(scale, offset, circles, hue) {
         this.scale = scale;
         this.offset = offset;
+        this.secondaryOffset = [0, 0];
         this.circles = circles;
 
         this.points = [];
@@ -147,8 +148,9 @@ class FourierDrawer {
         ctx.lineJoin = "round";
         ctx.lineWidth = 1.0;
 
-        ctx.translate(...this.offset);
+        ctx.translate(...this.secondaryOffset);
         ctx.scale(...this.scale);
+        ctx.translate(...this.offset);
 
         this.renderPath(t, ctx, partial);
         this.renderArms(t, ctx);
@@ -278,31 +280,54 @@ function shuffle(array) {
   }
 
 let t = 0;
+const SCALE = 3;
 
 window.onload = () => {
     fetch("/circles.json").then(res => res.json()).then(data => {
         data.sort((a, b) => a.offset[0] < b.offset[0] ? -1 : 1);
         console.log(data);
 
+        let canvas = document.getElementById("canvas");
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
         let drawers = [];
+        let minx = 5000, miny = 5000;
+        let maxx = 0, maxy = 0;
 
         for (const i in data) {
             const obj = data[i];
             let hue = (240 + i * 10) % 360;
 
-            let drawer = new FourierDrawer([3, 3], [50 + 3 * obj.offset[0], 50 + 3 * obj.offset[1]], obj.circles, hue);
+            let drawer = new FourierDrawer([SCALE, SCALE], obj.offset, obj.circles, hue);
             drawers.push(drawer);
+
+            for (point of drawer.points) {
+                minx = Math.min(minx, point[0] + obj.offset[0]);
+                miny = Math.min(miny, point[1] + obj.offset[1]);
+                maxx = Math.max(maxx, point[0] + obj.offset[0]);
+                maxy = Math.max(maxy, point[1] + obj.offset[1]);
+            }
         }
 
-        let canvas = document.getElementById("canvas");
+        let centerx = ((maxx + miny) / 2) * SCALE;
+        let centery = ((maxy + miny) / 2) * SCALE;
+
+        console.log(centerx, centery);
+        console.log(minx, maxx);
+
+        for (const i in data) {
+            console.log((canvasWidth / 2) - centerx);
+            drawers[i].secondaryOffset = [
+                (canvasWidth / 2) - centerx,
+                (canvasHeight / 2) - centery
+            ];
+        }
 
         let permutation = [...Array(drawers.length).keys()];
         shuffle(permutation);
 
         setInterval(() => {
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-    
             let ctx = canvas.getContext("2d");
             ctx.resetTransform();
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
