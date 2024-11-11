@@ -257,7 +257,7 @@ def draw_fourier(circles, n_points, fig: plt.Figure, ax: plt.Axes, offset):
 with open("path.txt") as f:
     path = parse_path(f.read())
 
-SIZE = 50
+SIZE =20
 
 parts = [[]]
 

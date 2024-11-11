@@ -282,8 +282,21 @@ function shuffle(array) {
 let t = 0;
 const SCALE = 3;
 
+const choices = [
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/anatol.json",
+    "/circles/salamander.json",
+    "/circles/troll.json"
+];
+
 window.onload = () => {
-    fetch("/circles.json").then(res => res.json()).then(data => {
+    fetch(choices[Math.floor(Math.random() * choices.length)]).then(res => res.json()).then(data => {
         data.sort((a, b) => a.offset[0] < b.offset[0] ? -1 : 1);
         console.log(data);
 
