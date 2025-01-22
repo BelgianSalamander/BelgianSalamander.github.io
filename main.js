@@ -15,6 +15,8 @@ const POINT_COUNT = 400;
 const SEGMENT_COUNT = 20;
 const SEGMENT_FRACTION = 1 / SEGMENT_COUNT;
 
+let performanceMode = false;
+
 class FourierDrawer {
     constructor(scale, offset, circles, hue) {
         this.scale = scale;
@@ -83,11 +85,15 @@ class FourierDrawer {
             let startColor = this.colors[i];
             let endColor = this.colors[i+1];
 
-            let gradient = ctx.createLinearGradient(this.points[start][0], this.points[start][1], this.points[end][0], this.points[end][1]);
-            gradient.addColorStop(0, startColor);
-            gradient.addColorStop(1, endColor);
+            if (performanceMode) {
+                ctx.strokeStyle = startColor;
+            } else {
+                let gradient = ctx.createLinearGradient(this.points[start][0], this.points[start][1], this.points[end][0], this.points[end][1]);
+                gradient.addColorStop(0, startColor);
+                gradient.addColorStop(1, endColor);
+                ctx.strokeStyle = gradient;
+            }
 
-            ctx.strokeStyle = gradient;
             ctx.beginPath();
             ctx.moveTo(...this.points[start]);
 
@@ -104,7 +110,6 @@ class FourierDrawer {
     }
 
     renderArms(t, ctx) {
-        let prevPos = [0, 0];
 
         ctx.strokeStyle = "#7772";
         ctx.fillStyle = "#000d";
@@ -112,12 +117,17 @@ class FourierDrawer {
         //ctx.moveTo(0, 0)
         ctx.lineWidth = 0.5;
 
+        let prevPos = [0, 0];
         for (const i in this.circles) {
+            if (performanceMode && i > 25) break;
+
             const circle = this.circles[i];
             const freq = circle[0];
             const real = circle[1];
             const imag = circle[2];
             const mag = Math.hypot(real, imag);
+
+            if (mag < 0.1) break;
 
             const x = t * freq * 2 * Math.PI;
             let dx = Math.cos(x) * real - Math.sin(x) * imag;
@@ -125,7 +135,6 @@ class FourierDrawer {
 
             let newPos = [prevPos[0] + dx, prevPos[1] + dy];
 
-            //ctx.lineTo(newPos[0], newPos[1]);
             if (i != 0 || freq != 0) {
                 ctx.beginPath();
                 ctx.ellipse(prevPos[0], prevPos[1], mag, mag, 0, 0, 2 * Math.PI);
@@ -332,12 +341,26 @@ window.onload = () => {
         let permutation = [...Array(drawers.length).keys()];
         shuffle(permutation);
 
-        setInterval(() => {
+        let startTime = new Date();
+
+        let updating = false;
+        let currSlowCalls = 0;
+        let updateFunction = () => {
+            if (updating) return;
+            updating = true;
+
+            let currTime = new Date();
+            t = (currTime.getTime() - startTime.getTime()) * 0.001 * 0.1;
+
+            if (performanceMode) {
+                setTimeout(updateFunction, 1000 / 30);
+            } else {
+                setTimeout(updateFunction, 1000 / 60);
+            }
+            
             let ctx = canvas.getContext("2d");
             ctx.resetTransform();
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    
-            t += 0.001;
 
             let easing = (x) => {
                 if (x < 0.5) return x * x;
@@ -345,8 +368,26 @@ window.onload = () => {
             };
             
             for (const i in drawers) {
-                drawers[i].renderState(easing(Math.max(0, t - permutation[i] * 0.02)), ctx);
+                drawers[i].renderState(easing(Math.max(0, t - permutation[i] * 0.02 + 500)), ctx);
             }
-        }, 10)
+
+            let endTime = new Date();
+            let callDuration = endTime.getTime() - currTime.getTime();
+
+            if (callDuration > 12) {
+                currSlowCalls += 1;
+            } else {
+                currSlowCalls = 0;
+            }
+
+            if (currSlowCalls > 10) {
+                performanceMode = true;
+                console.log("Enabled performance mode");
+            }
+
+            updating = false;
+        };
+
+        updateFunction();
     });
 }

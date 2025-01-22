@@ -6,6 +6,7 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
+import svg
 from svg.path import parse_path, Arc, QuadraticBezier, CubicBezier, Move, Line, Close, Path
 
 def sign(x):
@@ -257,7 +258,7 @@ def draw_fourier(circles, n_points, fig: plt.Figure, ax: plt.Axes, offset):
 with open("path.txt") as f:
     path = parse_path(f.read())
 
-SIZE = 50
+SIZE = 25
 
 parts = [[]]
 
