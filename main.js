@@ -1,107 +1,352 @@
-const DATA = [977933068523288, 816649646067548, 857292179022167, 345370203779968, 684577678490932, 1063860710286596, 744152047633462, 935590339014396, 465599524964258, 452519781946019, 416147676205559, 440913681501158, 936778853579934, 235007825501234, 51234331316710, 842048184786663, 619361610730130, 684820321974907, 961899301937852, 967347963872169, 497712735062989, 613096631104791, 81212916236420, 598041253778542, 888384250718634, 134563403834012, 866551315261323, 729793799291536, 464766973366024, 715442973679305, 418445588335867, 490339265346347, 742771232155587, 279680505987985, 1060380942100450, 528520084207746, 523138705371385, 374167289374804, 794080461944981, 374447139532270, 705732426085479, 726515346988699, 388097315289797, 705530322243678, 936691318469149, 630026890492354, 210686466791437, 1026213957460237, 454063478106973, 427631140938915, 125832674949265, 115285460239028, 532508651647043, 174284449565189, 659043291309739, 622293508701244, 754652241030761, 811317219619027, 556277426455516, 826412573313588, 497905095270172, 231802767742639, 848244334074003, 1090414167490123, 444156434341039, 285935249373485, 189501187098356, 25785977048814, 175958658461161, 1023666972016970, 1063264938061335, 562976634936790, 776917999572290, 574800567333482, 143924388849700, 159974984793978, 835334288617045, 492314826158581, 396055904536119, 502900293088822, 650214834562554, 717297039728409, 385694199430269, 150300011331685, 804664151363361, 304943163968842, 483886292604055, 713540007119773, 491854927059147, 6318966610670, 128052914614652, 649717139873276, 364734393099090, 888896849419150, 208846070221943, 736453131576381, 878205375599770, 64385971724059, 649119144146772, 607613524749723, 138668400372436, 736369378633343, 730930857261232, 370616190784211, 519905044750049, 430036373575760, 976971741356070, 114230653475022, 1072403112953888, 200890471808425, 801975512879029, 232974878528148, 1064780540174451, 1053001994043202, 842797018262489, 451093035941321, 283835565278526, 162262008148046, 758385694034387, 61886250835082, 427100131782242, 345647748170605, 419676887329405, 883731132116374, 907318858616533, 572527019074815, 545859708901875, 1095909094129051, 641873862073006, 445405028779632, 669864111611688, 831022104050596, 1096330746858951, 298753984963293, 730218964799338, 1113213607991041, 609090160615641, 475051813650024, 882857699932131, 519621588409211, 420457276758931, 354762586397534, 790630850058231, 471881349614717, 492477257027120, 1035711494836593, 1042691115175174, 240251480385516, 672814316001355, 1068165544218370, 1071188150047648, 748707458404095, 889546710081904, 660186360637950, 15131106074255, 829558301205995, 402431667437059, 1105675778073991, 255910054516019, 1069105516801973, 676814811016600, 91149225019989, 277592321620487, 533792287511041, 1005340618385465, 211073699634059, 278495370153290, 395046733421812, 357092269101078, 837113576556027, 477278833474102, 175400832469910, 270462909583880, 100246846802578, 809352281893775, 177402524022449, 412558904894857, 542975830541953, 366315303449048, 713711037813540]
+CIRCLES = [[0, 20.17366690003934, 31.210864826095086], [2, -8.297223100169726, 7.3375681194240645], [4, 8.766173885735205, -1.825854405162394], [3, 4.828799579383228, 6.949623634873109], [1, -5.624921112754044, 3.786127046115491], [-3, 0.6965798864892989, 6.719110608460776], [-4, -6.223195729451153, -1.1345861180330268], [-1, 0.018508972819354486, 6.306372311595307], [-2, -4.344662238255573, -2.1415072096011514], [-5, 0.6665183837485866, -2.9186792828877044], [5, -0.8740773336279825, -2.6419780628237537]]
 
-const ROWS = 50
-const COLS = 180
-
-let grid = new Array(ROWS).fill(0).map(() => new Array(COLS).fill(false));
-let writeGrid = new Array(ROWS).fill(0).map(() => new Array(COLS).fill(false));
-
-for (let col = 0; col < COLS; col++) {
-    let m = DATA[col];
-    for (let row = 0; row < ROWS; row++) {
-        grid[row][col] = m % 2 == 1;
-        m = Math.floor(m / 2);
-    }
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+  }
+  
+function rgbToHex(r, g, b, a) {
+    let res = "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    if (a) res += componentToHex(a);
+    return res;
 }
 
-function renderGrid() {
-    const canvas = golcanvas;
+const POINT_COUNT = 400;
+const SEGMENT_COUNT = 20;
+const SEGMENT_FRACTION = 1 / SEGMENT_COUNT;
+
+class FourierDrawer {
+    constructor(scale, offset, circles, hue) {
+        this.scale = scale;
+        this.offset = offset;
+        this.secondaryOffset = [0, 0];
+        this.circles = circles;
+
+        this.points = [];
+
+        for (let i = 0; i < POINT_COUNT; i++) {
+            this.points.push(this.calcPos(i / POINT_COUNT));
+        }
+
+        this.colors = [];
+
+        for (let i = 0; i <= SEGMENT_COUNT; i++) {
+            this.colors.push(`hsl(${hue}, 100%, ${50 + i / SEGMENT_COUNT * 50}%)`);
+        }
+    }
+
+    calcPos(t) {
+        let prevPos = [0, 0];
+
+        for (const circle of this.circles) {
+            const freq = circle[0];
+            const real = circle[1];
+            const imag = circle[2];
+
+            const x = t * freq * 2 * Math.PI;
+            let dx = Math.cos(x) * real - Math.sin(x) * imag;
+            let dy = Math.sin(x) * real + Math.cos(x) * imag;
+
+            let newPos = [prevPos[0] + dx, prevPos[1] + dy];
+
+            prevPos = newPos;
+        }
+
+        return prevPos;
+    }
+
+    renderPath(t, ctx, partial) {
+        const segmentStarts = [];
+        
+        for (let i = 0; i < SEGMENT_COUNT; i++) {
+            let start = Math.round((t - i * SEGMENT_FRACTION) * this.points.length);
+            if (start < 0 && partial) continue;
+            let bounded = (start % this.points.length + this.points.length) % this.points.length;
+            segmentStarts.push(bounded);
+        }
+
+
+        for (let i = segmentStarts.length - 1; i >= 0; i--) {
+            let start = segmentStarts[i];
+            let end;
+
+            if (i == segmentStarts.length - 1) {
+                if (partial) {
+                    end = 0;
+                } else {
+                    end = (start - Math.round(SEGMENT_FRACTION * this.points.length) + this.points.length) % this.points.length;
+                }
+            } else {
+                end = Math.max(0, segmentStarts[i+1]-1);
+            }
+
+            let startColor = this.colors[i];
+            let endColor = this.colors[i+1];
+
+            let gradient = ctx.createLinearGradient(this.points[start][0], this.points[start][1], this.points[end][0], this.points[end][1]);
+            gradient.addColorStop(0, startColor);
+            gradient.addColorStop(1, endColor);
+
+            ctx.strokeStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(...this.points[start]);
+
+            if (start != end) {
+                for (let i = (start - 1 + this.points.length) % this.points.length; i != end; i = (i - 1 + this.points.length) % this.points.length) {
+                    ctx.lineTo(...this.points[i]);
+                }
+            }
+
+            ctx.lineTo(...this.points[end]);
+
+            ctx.stroke();
+        }
+    }
+
+    renderArms(t, ctx) {
+        let prevPos = [0, 0];
+
+        ctx.strokeStyle = "#7772";
+        ctx.fillStyle = "#000d";
+        
+        //ctx.moveTo(0, 0)
+        ctx.lineWidth = 0.5;
+
+        for (const i in this.circles) {
+            const circle = this.circles[i];
+            const freq = circle[0];
+            const real = circle[1];
+            const imag = circle[2];
+            const mag = Math.hypot(real, imag);
+
+            const x = t * freq * 2 * Math.PI;
+            let dx = Math.cos(x) * real - Math.sin(x) * imag;
+            let dy = Math.sin(x) * real + Math.cos(x) * imag;
+
+            let newPos = [prevPos[0] + dx, prevPos[1] + dy];
+
+            //ctx.lineTo(newPos[0], newPos[1]);
+            if (i != 0 || freq != 0) {
+                ctx.beginPath();
+                ctx.ellipse(prevPos[0], prevPos[1], mag, mag, 0, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.ellipse(newPos[0], newPos[1], 0.5, 0.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            prevPos = newPos;
+        }
+    }
+
+    renderState(t, ctx) {
+        let partial = t < 1;
+        t = t % 1;
+
+        ctx.resetTransform();
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 1.0;
+
+        ctx.translate(...this.secondaryOffset);
+        ctx.scale(...this.scale);
+        ctx.translate(...this.offset);
+
+        this.renderPath(t, ctx, partial);
+        this.renderArms(t, ctx);
+    }
+};
+
+function renderState(t) {
+    t = t % 1;
+    const canvas = document.getElementById("canvas");
 
     let canvasWidth = canvas.width;
     let canvasHeight = canvas.height;
 
-    let sizeForWidth = canvasWidth / COLS;
-    let sizeForHeight = canvasHeight / ROWS;
-
-    let cellSize = Math.min(sizeForWidth, sizeForHeight);
-
-    let xOffset = (canvasWidth - cellSize * COLS) / 2;
-    let yOffset = (canvasHeight - cellSize * ROWS) / 2;
-
     let ctx = canvas.getContext("2d");
+    ctx.resetTransform();
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 1.0;
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.translate(20, 20);
+    ctx.scale(1.5, 1.5);
 
-    ctx.fillStyle = "#6f2f94";
+    const COLORS = [
+        /*"#2200ff",
+        "#152cff",
+        "#375bff",
+        "#506aff",
+        "#5fbfff",
+        "#79c3ff"*/
+    ];
 
-    for (let i = 0; i < COLS; i++) {
-        for (let j = 0; j < ROWS; j++) {
-            const fudge = 0.5;
-            if (grid[j][i]) {
-                ctx.fillRect(xOffset + i * cellSize - fudge, yOffset + j * cellSize - fudge, cellSize + 2 * fudge, cellSize + 2 * fudge);
-            }
-        }
+    const COUNT = 50;
+
+    for (let i = 0; i < COUNT; i++) {
+        COLORS.push(`hsl(240, 100%, ${50 + i / COUNT * 50}%)`);
     }
-}
 
-function updateGOL() {
-    let aliveRules = new Array(9).fill(false);
-    let deadRules = new Array(9).fill(false);
+    const segmentFraction = 0.02;
+    const segmentStarts = [];
 
-    aliveRules[2] = true;
-    aliveRules[3] = true;
-    deadRules[3] = true;
+    for (const i in COLORS) {
+        segmentStarts.push((Math.round((t * points.length - i * segmentFraction * points.length)) % points.length + points.length) % points.length);
+    }
+
+    for (let i = COLORS.length - 1; i >= 0; i--) {
+        let start = segmentStarts[i];
+        let end;
+
+        if (i == COLORS.length - 1) {
+            end = (start - Math.round(segmentFraction * points.length) + points.length) % points.length;
+        } else {
+            end = segmentStarts[i+1];
+        }
+
+        ctx.strokeStyle = COLORS[i];
+        ctx.beginPath();
+        ctx.moveTo(...points[start]);
+
+        for (let i = (start - 1 + points.length) % points.length; i != end; i = (i - 1 + points.length) % points.length) {
+            ctx.lineTo(...points[i]);
+        }
+
+        ctx.lineTo(...points[end]);
+
+        ctx.stroke();
+    }
+
+    /*ctx.strokeStyle = "#20f";
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+
+    for (let i = 1; i < points.length * t; i++) {
+        ctx.lineTo(...points[i]);
+    }
+
+    ctx.stroke();*/
+
+    let prevPos = [0, 0];
+
+    ctx.strokeStyle = "#7774";
     
-    for (let i = 0; i < ROWS; i++) {
-        for (let j = 0; j < COLS; j++) {
-            let neighbors = 0;
+    //ctx.moveTo(0, 0)
+    ctx.lineWidth = 0.5;
 
-            for (let x = i - 1; x <= i + 1; x++) {
-                for (let y = j - 1; y <= j + 1; y++) {
-                    if (x === i && y === j) {
-                        continue;
-                    }
+    for (circle of CIRCLES) {
+        const freq = circle[0];
+        const real = circle[1];
+        const imag = circle[2];
+        const mag = Math.hypot(real, imag);
 
-                    if (x < 0 || x >= ROWS || y < 0 || y >= COLS) {
-                        continue;
-                    }
+        const x = t * freq * 2 * Math.PI;
+        let dx = Math.cos(x) * real - Math.sin(x) * imag;
+        let dy = Math.sin(x) * real + Math.cos(x) * imag;
 
-                    if (grid[x][y]) {
-                        neighbors++;
-                    }
-                }
-            }
+        let newPos = [prevPos[0] + dx, prevPos[1] + dy];
 
-            writeGrid[i][j] = grid[i][j];
+        //ctx.lineTo(newPos[0], newPos[1]);
+        ctx.beginPath();
+        ctx.ellipse(prevPos[0], prevPos[1], mag, mag, 0, 0, 2 * Math.PI);
+        ctx.stroke();
 
-            if (grid[i][j]) {
-                writeGrid[i][j] = aliveRules[neighbors];
-            } else {
-                writeGrid[i][j] = deadRules[neighbors];
-            }
-        }
+        ctx.beginPath();
+        ctx.ellipse(newPos[0], newPos[1], 0.5, 0.5, 0, 0, 2 * Math.PI);
+        ctx.fill();
+
+        prevPos = newPos;
     }
 
-    let temp = grid;
-    grid = writeGrid;
-    writeGrid = temp;
-
-    renderGrid();
+    
 }
+
+//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+function shuffle(array) {
+    let currentIndex = array.length;
+  
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+  
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+  }
+
+let t = 0;
+const SCALE = 3;
 
 window.onload = () => {
-    renderGrid();
+    let url = "circles/anatol.json";
+    if (Math.random() < 0.01) {
+        url = "circles/troll.json";
+    }
 
-    let cnt = 10;
-    const t = 300;
-    let callback = () => {
-        if (cnt) {
-            updateGOL();
+    fetch(url).then(res => res.json()).then(data => {
+        data.sort((a, b) => a.offset[0] < b.offset[0] ? -1 : 1);
+        console.log(data);
+
+        let canvas = document.getElementById("canvas");
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+
+        let drawers = [];
+        let minx = 5000, miny = 5000;
+        let maxx = 0, maxy = 0;
+
+        for (const i in data) {
+            const obj = data[i];
+            let hue = (240 + i * 10) % 360;
+
+            let drawer = new FourierDrawer([SCALE, SCALE], obj.offset, obj.circles, hue);
+            drawers.push(drawer);
+
+            for (point of drawer.points) {
+                minx = Math.min(minx, point[0] + obj.offset[0]);
+                miny = Math.min(miny, point[1] + obj.offset[1]);
+                maxx = Math.max(maxx, point[0] + obj.offset[0]);
+                maxy = Math.max(maxy, point[1] + obj.offset[1]);
+            }
         }
-        cnt -= 1;
-        if (cnt) {
-            setTimeout(callback, t);
+
+        let centerx = ((maxx + miny) / 2) * SCALE;
+        let centery = ((maxy + miny) / 2) * SCALE;
+
+        console.log(centerx, centery);
+        console.log(minx, maxx);
+
+        for (const i in data) {
+            console.log((canvasWidth / 2) - centerx);
+            drawers[i].secondaryOffset = [
+                (canvasWidth / 2) - centerx,
+                (canvasHeight / 2) - centery
+            ];
         }
-    };
-    setTimeout(callback, t);
+
+        let permutation = [...Array(drawers.length).keys()];
+        shuffle(permutation);
+
+        setInterval(() => {
+            let ctx = canvas.getContext("2d");
+            ctx.resetTransform();
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    
+            t += 0.001;
+
+            let easing = (x) => {
+                if (x < 0.5) return x * x;
+                else return x - 0.25;
+            };
+            
+            for (const i in drawers) {
+                drawers[i].renderState(easing(Math.max(0, t - permutation[i] * 0.02)), ctx);
+            }
+        }, 10)
+    });
 }

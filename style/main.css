@@ -1,0 +1,146 @@
+body {
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+    overflow-y: scroll;
+}
+
+#outer-container {
+    margin: 0;
+    position: relative;
+    width: 100%;
+    left: 0;
+    top: 0;
+
+    height: 100%;
+
+    overflow-y: hidden;
+}
+
+#main-container {
+    position: relative;
+    width: 80%;
+    left: 50vw;
+    translate: -50% 0;
+    height: 100%;
+
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+.title {
+    text-align: center;
+    font-size: 3em;
+    margin-top: 1rem;
+    font-weight: bolder;
+}
+
+.navbar {
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    overflow: hidden;
+
+    color: #f5aeae;
+
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    align-items: center;
+
+    background-color: #000d;
+    backdrop-filter: blur(10px);
+
+    height: 50px;
+
+    border-bottom: 3px solid #f5aeae;
+    font-size: 1.5em;
+}
+
+.navbar div {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.navbar-links a{
+    color: #f5aeae;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+    text-decoration: none;
+}
+
+.navbar-links a:not(:first-child) {
+    border-left: 2px solid gray;
+}
+
+.navbar-links a:hover {
+    color: #ee8888;
+}
+
+.project-container {
+    display: grid;
+    width: 100%;
+
+    grid-template-columns: 1fr 1fr;
+    column-gap: 15px;
+    row-gap: 15px;
+}
+
+.project-entry {
+    display: grid;
+
+    grid-template-columns: 30% 70%;
+    column-gap: 15px;
+
+    min-height: 200px;
+
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.project-entry:nth-child(5n+1) {
+    background-color: rgba(148, 247, 247, 0.548);
+}
+
+.project-entry:nth-child(5n+2) {
+    background-color: rgba(148, 247, 234, 0.548);
+}
+
+.project-entry:nth-child(5n+3) {
+    background-color: rgba(148, 219, 247, 0.548);
+}
+
+.project-entry:nth-child(5n+4) {
+    background-color: rgba(148, 247, 222, 0.548);
+}
+
+.project-entry:nth-child(5n+5) {
+    background-color: rgba(148, 247, 201, 0.548);
+}
+
+.project-thumbnail {
+    height: 100%;
+    width: 100%;
+}
+
+.project-thumbnail img {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+}
+
+.project-info {
+    height: 100%;
+}
+
+.project-title {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+}
+
+.project-title a {
+    color: black;
+}
