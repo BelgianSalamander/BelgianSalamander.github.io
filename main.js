@@ -368,7 +368,7 @@ window.onload = () => {
             };
             
             for (const i in drawers) {
-                drawers[i].renderState(easing(Math.max(0, t - permutation[i] * 0.02 + 500)), ctx);
+                drawers[i].renderState(easing(Math.max(0, t - permutation[i] * 0.02)), ctx);
             }
 
             let endTime = new Date();
