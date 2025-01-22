@@ -144,3 +144,10 @@ body {
 .project-title a {
     color: black;
 }
+
+.under-construction {
+    background-color: red;
+    color: black;
+    padding-left: 1em;
+    padding-right: 1em;
+}
