@@ -12,7 +12,7 @@
             }
         </script>
           
-        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         
     </head>
     <body>
@@ -152,13 +152,13 @@
                     $$
                     \begin{align*}
                         f(t) &= e^{\alpha i} \cdot \left(\frac{1}{2} \cdot e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x-r_y\right)\right)\\
-                        &= \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i}
+                        &= \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i} \cdot (r_x - r_y)
                     \end{align*}
                     $$
 
                     Finally, we just need to shift it by $C$ to position it correctly. This gives us the complete equation:
                     $$
-                    f(t) = C + \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i}
+                    f(t) = C + \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i} \cdot (r_x - r_y)
                     $$
                     Although this equation may look a little nasty, it turns out its Fourier Transform is quite simple, as will be seen later.
 
@@ -177,38 +177,38 @@
 
                     To make things easierin the future, we will find the general solution for some integrals that come up often.
                     <h3>Fourier Transform of a Constant</h3>
-                    $$I = \int_a^b c \cdot e^{-\omega_nti}\mathrm{d}t = c \int_a^b e^{-\omega_nti} \mathrm{d}t$$
-                    If $\omega_n$ = 0 we get $I = \int_a^b c \mathrm{d}{t} = c \cdot (b-a)$. Otherwise, $I = c\cdot\frac{1}{-\omega_n i}\left[e^{-\omega_nti}\right]_a^b = \frac{ci}{\omega_n}\left(e^{-b\omega_ni} - e^{-a\omega_ni}\right)$.
-                    For simplicity we will denote this whole thing as $\hat{X}(\omega_n, c, a, b)$. Hence we have:
+                    $$I = \int_a^b 1 \cdot e^{-\omega_nti}\mathrm{d}t = \int_a^b e^{-\omega_nti} \mathrm{d}t$$
+                    If $\omega_n$ = 0 we get $I = \int_a^b 1 \mathrm{d}{t} = b-a$. Otherwise, $I = \frac{1}{-\omega_n i}\left[e^{-\omega_nti}\right]_a^b = \frac{i}{\omega_n}\left(e^{-b\omega_ni} - e^{-a\omega_ni}\right)$.
+                    For simplicity we will denote this whole thing as $\hat{X}(\omega_n, a, b)$. Hence we have:
                     $$
-                    \hat{X}(\omega_n, c, a, b) = \begin{cases}
-                        \frac{ci}{\omega_n}\left(e^{-b\omega_ni} - e^{-a\omega_ni}\right) & \omega_n \neq 0\\
-                        c \cdot (b-a) & \omega_n = 0
+                    \hat{X}(\omega_n, a, b) = \begin{cases}
+                        \frac{i}{\omega_n}\left(e^{-b\omega_ni} - e^{-a\omega_ni}\right) & \omega_n \neq 0\\
+                        b-a & \omega_n = 0
                     \end{cases}
                     $$
 
                     <h3>Fourier Transform of a Linear Term</h3>
                     We wish to evaluate the following:
-                    $$I = \int_a^b ct \cdot e^{-\omega_nti}\mathrm{d}t = c \int_a^b t \cdot e^{-\omega_nti}\mathrm{d}t$$
+                    $$I = \int_a^b t \cdot e^{-\omega_nti}\mathrm{d}t = \int_a^b t \cdot e^{-\omega_nti}\mathrm{d}t$$
                     Once again this is simply when $\omega = 0$. We get:
-                    $$I = c\int_a^b t \mathrm{d}{t} = c\left[\frac{t^2}{2}\right] = \frac{c}{2}\left(a^2 - b^2\right)$$
+                    $$I = \int_a^b t \mathrm{d}{t} = \left[\frac{t^2}{2}\right] = \frac{1}{2}\left(a^2 - b^2\right)$$
                     
                     When $\omega_n \neq 0$, this can be evaluated using integration by parts.
                     $$
                     \begin{align*}
-                    I &= c \left(\left[t \cdot \frac{i}{\omega_n} \cdot e^{-\omega_nti}\right]_a^b - \int_a^b\frac{i}{\omega_n} \cdot e^{-\omega_nti}\mathrm{d}t\right)\\
-                    &= c \left(\left[t \cdot \frac{i}{\omega_n} \cdot e^{-\omega_nti}\right]_a^b - \hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right)\right)\\
-                    &= \frac{ci}{\omega_n}\left(b \cdot e^{-b\omega_ni} - a \cdot e^{-a\omega_ni}\right) - c\hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right)
+                    I &= \left[t \cdot \frac{i}{\omega_n} \cdot e^{-\omega_nti}\right]_a^b - \int_a^b\frac{i}{\omega_n} \cdot e^{-\omega_nti}\mathrm{d}t\\
+                    &= \left[t \cdot \frac{i}{\omega_n} \cdot e^{-\omega_nti}\right]_a^b - \hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right)\\
+                    &= \frac{i}{\omega_n}\left(b \cdot e^{-b\omega_ni} - a \cdot e^{-a\omega_ni}\right) - \frac{i}{\omega_n}\hat{X}\left(\omega_n, a, b\right)
                     \end{align*} 
                     $$
 
-                    Let us denote this as $\hat{Y}(\omega_n, c, a, b)$.
-                    $$\hat{Y}(\omega_n, c, a, b) = \begin{cases}
-                    \frac{ci}{\omega_n}\left(b \cdot e^{-b\omega_ni} - a \cdot e^{-a\omega_ni}\right) - c\hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right) & \omega_n \neq 0\\
-                        \frac{c}{2} \cdot (b^2-a^2) & \omega_n = 0
+                    Let us denote this as $\hat{Y}(\omega_n, a, b)$.
+                    $$\hat{Y}(\omega_n, a, b) = \begin{cases}
+                        \frac{i}{\omega_n}\left(b \cdot e^{-b\omega_ni} - a \cdot e^{-a\omega_ni}\right) - \frac{i}{\omega_n}\hat{X}\left(\omega_n, a, b\right) & \omega_n \neq 0\\
+                        \frac{1}{2} \cdot (b^2-a^2) & \omega_n = 0
                     \end{cases}$$
 
-                    <h3>Fourier Transform of a Bezier Coefficient</h3>
+                    <h3>Fourier Transform of Bezier Basis Functions</h3>
                     This may seem slightly arbitrary, but we want to precalculate the fourier transform of $(t - a)^\alpha \cdot (b - t)^\beta$ for non-negative integers $\alpha, \beta$ and where $a,b$ are
                     also the bounds of integration. That is, we want to find
                     $$
@@ -238,7 +238,7 @@
                     $$\hat{Z}(0,\alpha,\beta,a,b) = \frac{\alpha!\beta!}{\left(\alpha+\beta+1\right)!}(b-a)^{\alpha+\beta+1}$$
 
                     One simple case is when $\alpha,\beta=0$ and $\omega_n \neq 0$. Then we just have
-                    $$\hat{Z}(\omega_n,0,0,a,b) = \hat{X}(\omega_n,1,a,b)$$
+                    $$\hat{Z}(\omega_n,0,0,a,b) = \hat{X}(\omega_n,a,b)$$
 
                     Now let's consider the case where only $\alpha=0$. Again we can use integration by parts.
                     $$
@@ -255,7 +255,7 @@
                     \begin{align*}
                         \hat{Z}(\omega_n,\alpha,0,a,b) &= \int_a^b(t-a)^\alpha e^{-\omega_nti}\mathrm{d}{t}\\
                         &= \left[\frac{i}{\omega_n}(t-a)^\alpha e^{-\omega_nti}\right]_a^b - \int_a^b \alpha \cdot \frac{i}{\omega_n} \cdot (t-a)^{\alpha-1}e^{-\omega_nti}\mathrm{d}t\\
-                        &= \frac{i}{\omega_n}(b-a)^\alpha e^{-\omega_nti} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, 0,a,b)
+                        &= \frac{i}{\omega_n}(b-a)^\alpha e^{-\omega_n b i} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, 0,a,b)
                     \end{align*}
                     $$
 
@@ -276,13 +276,33 @@
                     $$
                     \hat{Z}(\omega_n, \alpha, \beta, a, b) = \begin{cases}
                         \frac{\alpha!\beta!}{\left(\alpha+\beta+1\right)!}(b-a)^{\alpha+\beta+1} & \omega_n = 0\\
-                        \hat{X}(\omega_n,1,a,b) & \alpha, \beta = 0\\
+                        \hat{X}(\omega_n,a,b) & \alpha, \beta = 0\\
                         -\frac{i}{\omega_n}(b-a)^\beta e^{-\omega_n a i} + \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, 0, \beta-1,a,b) & \alpha = 0\\
-                        \frac{i}{\omega_n}(b-a)^\alpha e^{-\omega_nti} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, 0,a,b) & \beta = 0\\
+                        \frac{i}{\omega_n}(b-a)^\alpha e^{-\omega_n b i} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, 0,a,b) & \beta = 0\\
                         \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, \alpha, \beta-1, a, b) - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, \beta, a, b) & \text{otherwise}
                     \end{cases}
                     $$
 
+                    <h3>Fourier transform of an exponential</h3>
+                    $$
+                    \begin{align*}
+                    I = \hat{W}(\omega_n, p, a, b) &= \int_a^b e^{pt} \cdot e^{-\omega_nti} \mathrm{d}t\\
+                    &= \int_a^b e^{(p - \omega_n i)t}\mathrm{d}t
+                    \end{align*}
+                    $$
+                    If $p-\omega_ni=0$, then clearly $I = b-a$. Otherwise,
+                    $$
+                    \begin{align*}
+                        I = \left[\frac{1}{p-\omega_n i} e^{(p - \omega_n i)t}\right]_a^b = \frac{1}{p-\omega_n i} \cdot \left(e^{(p - \omega_n i)b} - e^{(p - \omega_n i)a}\right)
+                    \end{align*}
+                    $$
+                    So,
+                    $$
+                    \hat{W}(\omega_n, p, a, b) = \begin{cases}
+                        \frac{1}{p-\omega_n i} \cdot \left(e^{(p - \omega_n i)b} - e^{(p - \omega_n i)a}\right) & p - \omega_n i \neq 0\\
+                        b-a & \text{otherwise}
+                    \end{cases}
+                    $$
                     <h3>Fourier Transform of a Line</h3>
                     Recall that our equation for a line is $f(t) = a + vt$. We therefore want to evaluate the following:
                     $$
@@ -297,6 +317,86 @@
                     $$\hat{g}(\omega_n) = \hat{X}\left(\omega_n, a-vk, \frac{k}{N}, \frac{k+1}{N}\right) + \hat{Y}\left(\omega_n, vN, \frac{k}{N}, \frac{k+1}{N}\right)$$
 
                     <h3>Fourier Transform of a Bezier Curve</h3>
+                    Recall that for a Bezier Curve we have:
+                    $$f(t) = (1-t)^3p_0 + 3(1-t)^2tp_1 + 3(1-t)t^2p_2 + t^3p_3$$
+                    We wish to find the follwing integral:
+
+                    $$\hat{g}(\omega_n)=\int_\frac{k}{N}^\frac{k+1}{N} e^{-\omega_nti} \cdot f_k\left(N\left(t - \frac{k}{N}\right)\right) \mathrm{d}t$$
+
+                    To clean things up, let's set $a = \frac{k}{N}$ and $b = \frac{k+1}{N}$.
+
+                    $$\hat{g}(\omega_n)=\int_a^b e^{-\omega_nti} \cdot f_k\left(N\left(t - a\right)\right) \mathrm{d}t$$
+
+                    Subsituting this directly into our equation for $f(t)$ could get messy so let us first find a simpler form for $(1-t')$ where $t' = N(t-a)$.
+                    $$
+                    1-t' = 1-N(t-a) = N\left(\frac{1}{N} - (t-a)\right) = N\left(a+\frac{1}{N}-t\right)
+                    $$
+                    If we realise that $a+\frac{1}{N}=b$ we can write it as:
+                    $$
+                    1-t' = N(b-t)
+                    $$
+
+                    And we are now ready to do the substition.
+                    $$
+                    \begin{align*}
+                    f_k(N(t-a)) &= N^3(b-t)^3p_0 + 3N^3(b-t)^2(t-a)p_1 + 3N^3(b-t)(t-a)^2p_2 + N^3(t-a)^3p_3
+                    \end{align*}
+                    $$
+                    And so now we can get $\hat{g}(\omega_n)$
+                    $$
+                    \begin{align*}
+                    \hat{g}(\omega_n) &= \int_a^b e^{-\omega_nti} \cdot f_k\left(N\left(t - a\right)\right) \mathrm{d}t\\
+                    &= \int_a^b N^3 \cdot \left((b-t)^3p_0 + 3(b-t)^2(t-a)p_1 + 3(b-t)(t-a)^2p_2 + (t-a)^3p_3\right) e^{-\omega_nti} \mathrm{d}t\\
+                    &= N^3 \int_a^b \left((b-t)^3p_0 + 3(b-t)^2(t-a)p_1 + 3(b-t)(t-a)^2p_2 + (t-a)^3p_3\right) e^{-\omega_nti} \mathrm{d}t\\
+                    &= N^3 \int_a^b (b-t)^3p_0e^{-\omega_nti} + 3(b-t)^2(t-a)p_1e^{-\omega_nti} + 3(b-t)(t-a)^2p_2e^{-\omega_nti} + (t-a)^3p_3e^{-\omega_nti} \mathrm{d}t\\
+                    &= N^3 \left(
+                        \int_a^b (b-t)^3p_0e^{-\omega_nti} \mathrm{d}t + 
+                        \int_a^b 3(b-t)^2(t-a)p_1e^{-\omega_nti} \mathrm{d}t + 
+                        \int_a^b 3(b-t)(t-a)^2p_2e^{-\omega_nti} \mathrm{d}t + 
+                        \int_a^b (t-a)^3p_3e^{-\omega_nti} \mathrm{d}t
+                    \right)\\
+                    &= N^3 \left(
+                        p_0\int_a^b (b-t)^3e^{-\omega_nti} \mathrm{d}t + 
+                        3p_1\int_a^b (b-t)^2(t-a)e^{-\omega_nti} \mathrm{d}t + 
+                        3p_2\int_a^b (b-t)(t-a)^2e^{-\omega_nti} \mathrm{d}t + 
+                        p_3\int_a^b (t-a)^3e^{-\omega_nti} \mathrm{d}t
+                    \right)\\
+                    &= N^3 \left(p_0\hat{Z}(\omega_N,0,3,a,b)+3p_1\hat{Z}(\omega_N,1,2,a,b)+3p_2\hat{Z}(\omega_N,2,1,a,b)+p_3\hat{Z}(\omega_N,0,3,a,b)\right)
+                    \end{align*}
+                    $$
+                    <h3>Fourier Transform of an Arc</h3>
+                    Recall that for an arc we have:
+                    $$
+                    f(t) = C + \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i} \cdot (r_x - r_y)
+                    $$
+                    Then,
+                    $$
+                    \begin{align*}
+                        \hat{g}(\omega_n) = \int_\frac{k}{N}^\frac{k+1}{N} e^{-\omega_nti} \cdot f_k\left(N\left(t - \frac{k}{N}\right)\right) \mathrm{d}t
+                    \end{align*}
+                    $$
+                    Again let us set $a = \frac{k}{N}$ and $b = \frac{k+1}{N}$
+                    $$
+                    \begin{align*}
+                        \hat{g}(\omega_n) &= \int_a^b e^{-\omega_nti} \cdot f_k\left(N\left(t - a\right)\right) \mathrm{d}t\\
+                        &= \int_a^b e^{-\omega_nti} \cdot \left(C + \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + N\left(t - a\right) \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - N\left(t - a\right) \cdot \Delta\theta\right)i} \cdot (r_x - r_y)\right) \mathrm{d}t\\
+                        &= \int_a^b e^{-\omega_nti} \cdot \left(C + \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 - a\Delta \theta + Nt \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 +a \Delta\theta - Nt\Delta\theta\right)i} \cdot (r_x - r_y)\right) \mathrm{d}t\\
+                        &= \int_a^b e^{-\omega_nti} \cdot \left(C + \frac{1}{2} \left(r_x + r_y\right) e^{\left(\alpha+\theta_0-a\Delta\theta\right)i} e^{Nt \Delta\theta i} + \frac{1}{2} (r_x - r_y) e^{\left(\alpha - \theta_0 + a \Delta\theta\right)i}e^{-Nt\Delta\theta i} \right) \mathrm{d}t\\
+                        &= \int_a^b C \cdot e^{-\omega_nti} \mathrm{d} t + \int_a^b \frac{1}{2} \left(r_x + r_y\right) e^{\left(\alpha+\theta_0-a\Delta\theta\right)i} e^{Nt \Delta\theta i} e^{-\omega_nti} \mathrm{d}t + \int_a^b \frac{1}{2} (r_x - r_y) e^{\left(\alpha - \theta_0 + a \Delta\theta\right)i}e^{-Nt\Delta\theta i} e^{-\omega_nti}\mathrm{d}t\\
+                        &= \int_a^b C \cdot e^{-\omega_nti} \mathrm{d} t + \frac{1}{2} \left(r_x + r_y\right) e^{\left(\alpha+\theta_0-a\Delta\theta\right)i} \int_a^b e^{Nt \Delta\theta i} e^{-\omega_nti} \mathrm{d}t + \frac{1}{2} (r_x - r_y) e^{\left(\alpha - \theta_0 + a \Delta\theta\right)i} \int_a^b e^{-Nt\Delta\theta i} e^{-\omega_nti}\mathrm{d}t\\
+                        &= C \cdot \hat{X}(\omega_n, a, b) + \frac{1}{2} \left(r_x + r_y\right) e^{\left(\alpha+\theta_0-a\Delta\theta\right)i} \cdot \hat{W}(\omega_n, Nt\Delta\theta, a, b) + \frac{1}{2} (r_x - r_y) e^{\left(\alpha - \theta_0 + a \Delta\theta\right)i} \cdot \hat{W}(\omega_n, -Nt\Delta\theta,a,b)
+                    \end{align*}
+                    $$
+
+                    <h2>Bringing it all together</h2>
+                    Finally, we can calculate the values we need for all the circles. We can select circle frequences $\omega_n = -50\pi, -48\pi, \ldots 0, \ldots, 48\pi, 50\pi$ and then calculate all the starting positions with
+                    $$
+                    c_n = \sum_k \hat{g}_k(\omega_n)
+                    $$
+                    For what you see on the main page, the starting positions of the circles are pre-calculated (you can even find the data at <a href="/circles/anatol.json">anatol.nz/circles/anatol.json</a>). Then, a little
+                    bit of javascript reads it and renders the moving circles using an HTML Canvas.
+
+                    <br><br>As an Easter Egg, when the page is loaded, there is a one in hundred chance that it will display the text "[object Object]" instead of "Anatol".
             </div>
         </div>
     </body>
