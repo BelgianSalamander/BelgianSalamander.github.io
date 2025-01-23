@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/style/main.css">
+        <title>Anatol Coen - Fourier Drawer</title>
+        <script>
+            MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ["\\(", "\\)"]],
+                processEscapes: true,
+              }
+            }
+        </script>
+          
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+    </head>
+    <body>
+        <div class="navbar">
+            <div>Anatol Coen</div>
+            <div class="under-construction">This Website is still Under Construction</div>
+            <div class = "navbar-links">
+                <a href = "/">About</a><a href = "/projects.html">Projects</a>
+            </div>
+        </div>
+        <div style="height:50px;"></div>
+        <div id="outer-container">
+            <div id="main-container">
+                <h1 class="title">Fourier Drawer &mdash; How does it work?</h1>
+                <hr>
+                <div id="main-content">
+                    The Fourier Drawer is the animation that can be found on the <a href="/">main page of this website</a>. The animation consists of a chains of circles.
+                    In each chain, each circle spins at a constant rate around the previous circle. By precisely tuning the size and starting position of each circle, we can 
+                    control the shape the path of the smallest circle traces out. In the case of the main page, seven of these chains of circles draw out my name. This page 
+                    will describe the methods and the maths behind determining the starting position and sizes of the circles. This was heavily inspired by 
+                    <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">3Blue1Brown's Video on Drawing with Circles</a>.
+
+                    <h2>The Fourier Transform</h2>
+                    <h2>TODO: Use $n,m$ instead of $i,j$</h2>
+                    We can start by describing the movement of the circles mathematically. For each circle we need three values to describe it. Specifically, for the $i^\text{th}$ circle,
+                    we need its radius $r_i$, the integer frequency $f_i$ at which the next circle around it spins, and the starting angle $\theta_i$ of this next circle. This means that relative 
+                    to this circle, at time $t$, the next circle is positioned at:
+                    $$\left(r_i\cos\left(\theta_i + 2\pi tf_i\right),r_i\sin\left(\theta_i + 2\pi tf_i\right)\right)$$
+                    To get the position of the final circle in the chain we just need to add this up for all circles, meaning for some set of circles, the path we trace out will be the equation
+                    below where $P(t)$ cna be thought of as a function that traces out the path over time, where $t \in (0, 1)$.
+                    $$P(t) = \left(\sum_i r_i\cos\left(\theta_i + 2\pi tf_i\right), \sum_i r_i\sin\left(\theta_i + 2\pi tf_i\right)\right)$$
+
+                    It turns out its easier if instead of thinking of the path we trace as a set of 2D points, we think of them as complex numbers. To formulate it this way, for each circle instead of
+                    using its radius $r_i$ and starting angle $\theta_i$, we just store its starting position $c_i = r_ie^{\theta_ii}$. Additionaly, instead of thinking of frequencies we will use angular
+                    velocities $\omega_i$ = $2\pi f_i$. Then, the equation above becomes
+                    $$P(t) = \sum_i c_ie^{\omega_iti}$$
+
+                    Now what we want to do is go the other way. We have a shape we want to draw (say a letter) which we can represent as a complex function of time $P(t)$.
+                    Then, we need to find all the $c_i$. The way to do this is with a fourier transform. It turns out that:
+                    $$c_i = \int_0^1P(t) \cdot e^{-\omega_iti} \mathrm{d}t$$
+                    We can prove this by splitting the $P(t)$ term as follows:
+                    $$\int_0^1\left(c_ie^{\omega_iti} + \sum_{j\neq i}c_je^{\omega_jti}\right)\cdot e^{-\omega_iti} \mathrm{d}t$$
+                    Then by ditributing the $e^{-\omega_iti}$ term and the integral we get
+                    $$\int_0^1c_ie^{\omega_iti}\cdot e^{-\omega_iti} \mathrm{d}t + \int_0^1\sum_{j\neq i}c_je^{\omega_jti}\cdot e^{-\omega_iti} \mathrm{d}t$$
+                    Combining exponential terms we get:
+                    $$\int_0^1 c_i e^0\mathrm{d}t + \int_0^1\sum_{j \neq i}c_j e^{\left(\omega_j - \omega_i\right)ti}\mathrm{d}t$$
+                    The first integral is just equal to $\int_0^1c_i\mathrm{d}t = c_i$. To evaluate the second integral, it  is useful to switch the order of the sum and the integral.
+                    $$c_i + \sum_{j\neq i}\int_0^1c_j e^{\left(\omega_j - \omega_i\right)ti}\mathrm{d}t$$
+                    This integral is quite easy to integrate
+                    $$
+                    \begin{align*}
+                         &c_i + \sum_{j \neq i}\left[\frac{1}{\left(\omega_j-\omega_i\right)i}\cdot e^{\left(\omega_j - \omega_i\right)ti}\right]_0^1\\
+                        =&c_i + \sum_{j \neq i}\frac{1}{\left(\omega_j-\omega_i\right)i} \cdot \left(e^{\left(\omega_j - \omega_i\right)i} - e^0\right)
+                    \end{align*}
+                    $$
+                    Recall that $w_x$ is just an integer multiple of $2\pi$. This means $\left(\omega_j-\omega_i\right)$ is also an integer multiple of $2\pi$. Hence $e^{\left(\omega_j - \omega_i\right)i}=1$ and we get
+                    $$
+                        c_i + \sum_{j \neq i} \frac{1}{\left(\omega_j-\omega_i\right)i} \cdot (1 - 1) = c_i + \sum_{i \neq j} 0 = c_i
+                    $$
+                    And so we have shown that this fourier transform allows us to extract the values of $c_i$. This does seem to assume that all $P(t)$ can be represented 
+                    using an infinite sum of spinning circles. I am not completely sure how this is proven but it does appear to be true. 
+                    
+                    <br><br>In practice, I cannot actually calculate the $c_i$ values for an infinite number of circles and then draw an infinite number of circles. However,
+                    for any reasonably behaved curve, the $c_i$ values quickly go to $0$ for large-ish $|\omega_i|$ and so if we only draw circles with $-50 \le \omega_i \le 50$
+                    we get a reasonably good approximation of our path $P(t)$.
+
+                    <h2>Defining the Path</h2>
+                    How do we actually define $P(t)$ to draw out a letter? To make my fourier drawer able to draw very many shapes, I settled on making a representation based on
+                    <a href="https://www.w3.org/TR/SVG2/paths.html#PathData">SVG Path Data</a>. This format represents a curve using a series of simple shapes. These shapes are:
+                    <ul>
+                        <li>Straight Lines</li>
+                        <li>Quadratic Bezier Curves</li>
+                        <li>Cubic Bezier Curves</li>
+                        <li>Arcs of Ellipses</li>
+                    </ul>
+                    Each of these shapes have reasonably simple parametric descriptions and this allows us to have a reasonably simple definition of $P(t)$. Assume our curve is 
+                    a sequence of $N$ of these shapes. We can define this series of shapes as $f_0(t), f_2(t), \ldots f_{N-1}(t)$ where $f_x(t)$ is a parametric definition of the $x^\text{th}$
+                    shape on the domain $(0, 1)$. Then, we can split up the domain of $P(t)$ into $N$ intervals of equal size numbered from $0$ to $N-1$. For a certain $t$, let $k$ be the number 
+                    of the interval it lies in. This means $t \in \left(\frac{k}{N}, \frac{k+1}{N}\right)$ Then, 
+                    $$P(t) = f_k\left(\left(t - \frac{k}{N}\right) \cdot N\right)$$
+                    The whole $\left(t - \frac{k}{N}\right) \cdot N$ thing just transforms the $\left(\frac{k}{N}, \frac{k+1}{N}\right)$ domain into the $(0,1)$ domain of $f_k$.
+
+                    <br><br>A slightly nicer way to define this function is to define another set of functions $g_0(t), g_1(t), \ldots, g_{N-1}(t)$. These are defined on the same domain as $P(t)$. 
+                    We define $g_k(t)$ as follows. When $t$ is in the $k^\text{th}$ interval as described above, $g_k(t)$ traces out the full path of $f_k(t)$. Otherwise $g_k(t)=0$. Specifically,
+                    $$
+                        g_k(t) = \begin{cases}f_k\left(\left(t - \frac{k}{N}\right) \cdot N\right) & t \in \left(\frac{k}{N}, \frac{k+1}{N}\right) \\ 0+0i & \text{otherwise}\end{cases}
+                    $$
+                    Then, $P(t)$ just becomes the sum of all $g_k(t)$. So,
+                    $$P(t) = \sum_{k=0}^{N-1}g_k(t)$$
+                    This representation makes it slightly easier to take the fourier transform.
+
+                    <h2>Parametric Definitions of SVG Path Components</h2>
+                    This section simply provides mathematical definitions for the $f_k(t)$ functions described above for each of the shapes required.
+
+                    <h3>Lines</h3>
+                    A line simply goes from some point $a$ to another point $b$. Therefore we can just write it as:
+                    $$f(t) = a + (b-a) \cdot t$$
+                    Where $a,b$ are complex numbers. To simplify it let $v = b-a$. Then,
+                    $$f(t) = a + vt$$
+                    <h3>Quadratic Bezier Curves</h3>
+                    It turns out all quadratic bezier curves can be rewritten as a cubic bezier curve. So, we can just do that and then we can ignore the quadratic bezier curve case.
+
+                    <h3>Cubic Bezier Curves</h3>
+                    We can just use the standard bezier curve definition. Let $p_0,p_1,p_2,p_3$ be the four points defining the bezier curve. Then,
+                    $$f(t) = (1-t)^3p_0 + 3(1-t)^2tp_1 + 3(1-t)t^2p_2 + t^3p_3$$
+
+                    <h3>Arcs</h3>
+                    In an SVG, an arc is just a portion of an ellipse and the ellipse itself may be rotated. From the SVG data we can extract:
+                    <ul>
+                        <li>The center of the arc, call it $C$</li>
+                        <li>The start and end angles of the arc, call them $\theta_0, \theta_1$</li>
+                        <li>The $x$ and $y$ radius of the ellipse, $r_x$, $r_y$</li>
+                        <li>The extra rotation of the ellipse, call it $\alpha$</li>
+                    </ul>
+                    For simplicty we define $\Delta\theta = \theta_1 - \theta_0$.
+                    The equation for a simple circle arc is then:
+                    $$f(t) = e^{\left(\theta_0 + t \cdot \Delta\theta\right)i}$$
+
+                    To scale the $x$ and $y$ radii separately, we need to split this exponential into its real and imaginary components. This can be done as follows
+                    $$
+                    \begin{align*}
+                        f_\text{real}(t) &= \frac{e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} + e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i}}{2}\\
+                        f_\text{imag}(t) &= \frac{e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} - e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i}}{2}
+                    \end{align*}
+                    $$
+
+                    So then, scaling by the two radii and adding stuff back together we get
+                    $$
+                    f(t) = r_x \cdot \frac{e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} + e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i}}{2} + r_y \cdot \frac{e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} - e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i}}{2}
+                    $$
+                    We can then collect like terms to simplify this slightly
+                    $$
+                    f(t) = \frac{1}{2} \cdot e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x-r_y\right)
+                    $$
+
+                    Then, we need to rotate the whole thing by $\alpha$, which can be done by multiplying by $e^{\alpha i}$. This exponential can be distributed over the others.
+                    $$
+                    \begin{align*}
+                        f(t) &= e^{\alpha i} \cdot \left(\frac{1}{2} \cdot e^{\left(\theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{-\left(\theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x-r_y\right)\right)\\
+                        &= \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i}
+                    \end{align*}
+                    $$
+
+                    Finally, we just need to shift it by $C$ to position it correctly. This gives us the complete equation:
+                    $$
+                    f(t) = C + \frac{1}{2} \cdot e^{\left(\alpha + \theta_0 + t \cdot \Delta\theta\right)i} \cdot \left(r_x + r_y\right) + \frac{1}{2} \cdot e^{\left(\alpha - \theta_0 - t \cdot \Delta\theta\right)i}
+                    $$
+                    Although this equation may look a little nasty, it turns out its Fourier Transform is quite simple, as will be seen later.
+
+                    <h2>The Fourier Transform of Bezier Curves (and Arcs)</h2>
+                    There are two ways to then take the required Fourier Transform. The simplest way is to sample many points of $P(t)$ and take a Discrete Fourier Transform. However, as a challenge, I decided
+                    to actually find analytical solutions of the integral of $P(t)$. Recall that for some $n$ we want to calculate the following:
+                    $$c_n = \int_0^1 P(t) e^{-\omega_nti} \mathrm{d}t$$
+
+                    Using our definition for $P(t)$ and then swapping the sum and the integral we get:
+                    $$c_n = \int_0^1 e^{-\omega_nti} \cdot \sum_{k=0}^{N-1}g_k(t) \mathrm{d}t = \int_0^1 \sum_{k=0}^{N-1}e^{-\omega_nti} \cdot g_k(t) \mathrm{d}t = \sum_{k=0}^{N-1} \int_0^1 e^{-\omega_nti} \cdot g_k(t) \mathrm{d}t$$ 
+                    Now, all we need is an equation for $\int_0^1 e^{-\omega_nti} \cdot g_k(t) \mathrm{d}t$ for our three different kinds of $g_k(t)$. We can denote this expression as $\hat{g}(\omega_n)$. Since $g_k(t)$ is zero everywhere except for $t \in \left(\frac{k}{N}, \frac{k+1}{N}\right)$
+                    we can slightly change the bounds of the integral to get
+                    $$
+                    \hat{g}(\omega_n) = \int_0^1 e^{-\omega_nti} \cdot g_k(t) \mathrm{d}t = \int_{\frac{k}{N}}^{\frac{k+1}{N}} e^{-\omega_nti} \cdot g_k(t) \mathrm{d}t = \int_{\frac{k}{N}}^{\frac{k+1}{N}} e^{-\omega_nti} \cdot f_k\left(\left(t - \frac{k}{N}\right) \cdot N\right) \mathrm{d}t
+                    $$
+
+                    To make things easierin the future, we will find the general solution for some integrals that come up often.
+                    <h3>Fourier Transform of a Constant</h3>
+                    $$I = \int_a^b c \cdot e^{-\omega_nti}\mathrm{d}t = c \int_a^b e^{-\omega_nti} \mathrm{d}t$$
+                    If $\omega_n$ = 0 we get $I = \int_a^b c \mathrm{d}{t} = c \cdot (b-a)$. Otherwise, $I = c\cdot\frac{1}{-\omega_n i}\left[e^{-\omega_nti}\right]_a^b = \frac{ci}{\omega_n}\left(e^{-b\omega_ni} - e^{-a\omega_ni}\right)$.
+                    For simplicity we will denote this whole thing as $\hat{X}(\omega_n, c, a, b)$. Hence we have:
+                    $$
+                    \hat{X}(\omega_n, c, a, b) = \begin{cases}
+                        \frac{ci}{\omega_n}\left(e^{-b\omega_ni} - e^{-a\omega_ni}\right) & \omega_n \neq 0\\
+                        c \cdot (b-a) & \omega_n = 0
+                    \end{cases}
+                    $$
+
+                    <h3>Fourier Transform of a Linear Term</h3>
+                    We wish to evaluate the following:
+                    $$I = \int_a^b ct \cdot e^{-\omega_nti}\mathrm{d}t = c \int_a^b t \cdot e^{-\omega_nti}\mathrm{d}t$$
+                    Once again this is simply when $\omega = 0$. We get:
+                    $$I = c\int_a^b t \mathrm{d}{t} = c\left[\frac{t^2}{2}\right] = \frac{c}{2}\left(a^2 - b^2\right)$$
+                    
+                    When $\omega_n \neq 0$, this can be evaluated using integration by parts.
+                    $$
+                    \begin{align*}
+                    I &= c \left(\left[t \cdot \frac{i}{\omega_n} \cdot e^{-\omega_nti}\right]_a^b - \int_a^b\frac{i}{\omega_n} \cdot e^{-\omega_nti}\mathrm{d}t\right)\\
+                    &= c \left(\left[t \cdot \frac{i}{\omega_n} \cdot e^{-\omega_nti}\right]_a^b - \hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right)\right)\\
+                    &= \frac{ci}{\omega_n}\left(b \cdot e^{-b\omega_ni} - a \cdot e^{-a\omega_ni}\right) - c\hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right)
+                    \end{align*} 
+                    $$
+
+                    Let us denote this as $\hat{Y}(\omega_n, c, a, b)$.
+                    $$\hat{Y}(\omega_n, c, a, b) = \begin{cases}
+                    \frac{ci}{\omega_n}\left(b \cdot e^{-b\omega_ni} - a \cdot e^{-a\omega_ni}\right) - c\hat{X}\left(\omega_n, \frac{i}{\omega_n}, a, b\right) & \omega_n \neq 0\\
+                        \frac{c}{2} \cdot (b^2-a^2) & \omega_n = 0
+                    \end{cases}$$
+
+                    <h3>Fourier Transform of a Bezier Coefficient</h3>
+                    This may seem slightly arbitrary, but we want to precalculate the fourier transform of $(t - a)^\alpha \cdot (b - t)^\beta$ for non-negative integers $\alpha, \beta$ and where $a,b$ are
+                    also the bounds of integration. That is, we want to find
+                    $$
+                    I = \hat{Z}(\omega_n, \alpha, \beta, a, b) = \int_a^b (t - a)^\alpha \cdot (b - t)^\beta \cdot e^{-\omega_nti} \mathrm{d}t
+                    $$
+                    This is quite a complex integral and requires a lot of cases, integration by parts and recursive definitions. Let us start with the case $\omega_n, \alpha = 0$. Then,
+                    $$
+                    \hat{Z}(0, 0, \beta, a, b) = \int_a^b (b-t)^\beta \mathrm{d}{t} = \frac{-1}{\beta+1}\left[(b - t)^{\beta+1}\right]_a^b = \frac{-1}{\beta+1}\left(0 - (b-a)^{\beta+1}\right) = \frac{(b-a)^{\beta+1}}{\beta+1}
+                    $$
+                    Similarly for the case $\omega_n, \beta = 0$ we get:
+                    $$
+                    \hat{Z}(0, \alpha, 0, a, b) = \int_a^b (t-a)^\alpha \mathrm{d}{t} = \frac{1}{\alpha+1}\left[(t-a)^{\alpha+1}\right]_a^b = \frac{1}{\alpha+1}\left((b-a)^{\alpha+1}-0\right) = \frac{(b-a)^{\alpha+1}}{\alpha+1}
+                    $$
+                    Now for the case where we have $\omega = 0, \alpha,\beta \neq 0$ we need some integration by parts. By always selecting $u = (t-a)^\alpha$ and $\mathrm{d}v = (b-t)^\beta$ we
+                    end up with an integral where $\alpha$ has decreased by one. We end up recursively repeating this until $\alpha=0$ in which case we can use the case we have already calculated.
+                    $$
+                    \begin{align*}
+                    \hat{Z}(0, \alpha, \beta, a, b) &= \left[-\frac{1}{\beta+1}(t-a)^\alpha(b-t)^{\beta+1}\right]_a^b - \int_a^b -\frac{\alpha}{\beta+1} (t-a)^{\alpha-1} (b-t)^{\beta+1} \mathrm{d}{t}\\
+                    &=\left[-\frac{1}{\beta+1}(t-a)^\alpha(b-t)^{\beta+1}\right]_a^b +\frac{\alpha}{\beta+1}\hat{Z}(0,\alpha-1,\beta+1,a,b)\\
+                    &= -\frac{1}{\beta+1}(b-a)^\alpha(b-b)^{\beta+1} + \frac{1}{\beta+1}(a-a)^\alpha(a-t)^{\beta+1} +\frac{\alpha}{\beta+1}\hat{Z}(0,\alpha-1,\beta+1,a,b)\\
+                    &= -\frac{1}{\beta+1}(b-a)^\alpha 0^{\beta+1} + \frac{1}{\beta+1}0^\alpha(a-t)^{\beta+1} +\frac{\alpha}{\beta+1}\hat{Z}(0,\alpha-1,\beta+1,a,b)\\
+                    &= \frac{\alpha}{\beta+1}\hat{Z}(0,\alpha-1,\beta+1,a,b)
+                    \end{align*}
+                    $$
+
+                    Using a little induction (or just looking at this long enough) we can find a non-recursive form of this case which ends up also being valid even when $\alpha$ or $\beta$ are zero (or both).
+                    $$\hat{Z}(0,\alpha,\beta,a,b) = \frac{\alpha!\beta!}{\left(\alpha+\beta+1\right)!}(b-a)^{\alpha+\beta+1}$$
+
+                    One simple case is when $\alpha,\beta=0$ and $\omega_n \neq 0$. Then we just have
+                    $$\hat{Z}(\omega_n,0,0,a,b) = \hat{X}(\omega_n,1,a,b)$$
+
+                    Now let's consider the case where only $\alpha=0$. Again we can use integration by parts.
+                    $$
+                    \begin{align*}
+                        \hat{Z}(\omega_n,0,\beta,a,b) &= \int_a^b(b-t)^\beta e^{-\omega_nti}\mathrm{d}{t}\\
+                        &= \left[\frac{i}{\omega_n}(b-t)^\beta e^{-\omega_nti}\right]_a^b - \int_a^b -\beta \cdot \frac{i}{\omega_n} \cdot (b-t)^{\beta-1}e^{-\omega_nti}\mathrm{d}t\\
+                        &= -\frac{i}{\omega_n}(b-a)^\beta e^{-\omega_n a i} + \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, 0, \beta-1,a,b)
+                    \end{align*}
+                    $$
+                    There does not appear to be a nicer closed form than this.
+
+                    Now let's consider the almost identical case where only $\beta=0$.
+                    $$
+                    \begin{align*}
+                        \hat{Z}(\omega_n,\alpha,0,a,b) &= \int_a^b(t-a)^\alpha e^{-\omega_nti}\mathrm{d}{t}\\
+                        &= \left[\frac{i}{\omega_n}(t-a)^\alpha e^{-\omega_nti}\right]_a^b - \int_a^b \alpha \cdot \frac{i}{\omega_n} \cdot (t-a)^{\alpha-1}e^{-\omega_nti}\mathrm{d}t\\
+                        &= \frac{i}{\omega_n}(b-a)^\alpha e^{-\omega_nti} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, 0,a,b)
+                    \end{align*}
+                    $$
+
+                    Finally we can consider the general case when $\omega_n,\alpha,\beta$ are all non-zero. We again do integraion by parts where $u = (t-a)^\alpha(b-t)^\beta$ and $\mathrm{d}u = e^{-\omega_nti}$.
+                    $$
+                    \begin{align*}
+                        \hat{Z}(\omega_n, \alpha, \beta, a, b) &= \int_a^b (t - a)^\alpha \cdot (b - t)^\beta \cdot e^{-\omega_nti} \mathrm{d}t\\
+                        &= \left[\frac{i}{\omega_n}(t-a)^\alpha(b-t)^\beta e^{-\omega_nti}\right]_a^b - \int_a^b \frac{i}{\omega_n}\left(\alpha(t-a)^{\alpha-1}(b-t)^\beta-\beta(t-a)^\alpha(b-t)^{\beta-1}\right) e^{-\omega_nti} \mathrm{d}t\\
+                        &= \left[\frac{i}{\omega_n}(t-a)^\alpha(b-t)^\beta e^{-\omega_nti}\right]_a^b - \int_a^b \frac{\alpha i}{\omega_n}(t-a)^{\alpha-1}(b-t)^\beta e^{-\omega_nti} \mathrm{d}t + \int_a^b \frac{\beta i}{\omega_n}(t-a)^\alpha(b-t)^{\beta-1} e^{-\omega_nti} \mathrm{d}t\\
+                        &= \left[\frac{i}{\omega_n}(t-a)^\alpha(b-t)^\beta e^{-\omega_nti}\right]_a^b - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, \beta, a, b) + \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, \alpha, \beta-1, a, b)\\
+                        &= \frac{i}{\omega_n}(b-a)^\alpha(b-b)^\beta e^{-\omega_nti} - \frac{i}{\omega_n}(a-a)^\alpha(b-a)^\beta e^{-\omega_nti} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, \beta, a, b) + \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, \alpha, \beta-1, a, b)\\
+                        &= \frac{i}{\omega_n}(b-a)^\alpha 0^\beta e^{-\omega_nti} - \frac{i}{\omega_n}0^\alpha(b-a)^\beta e^{-\omega_nti} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, \beta, a, b) + \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, \alpha, \beta-1, a, b)\\
+                        &= \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, \alpha, \beta-1, a, b) - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, \beta, a, b)
+                    \end{align*}
+                    $$
+
+                    Combining everything we get:
+                    $$
+                    \hat{Z}(\omega_n, \alpha, \beta, a, b) = \begin{cases}
+                        \frac{\alpha!\beta!}{\left(\alpha+\beta+1\right)!}(b-a)^{\alpha+\beta+1} & \omega_n = 0\\
+                        \hat{X}(\omega_n,1,a,b) & \alpha, \beta = 0\\
+                        -\frac{i}{\omega_n}(b-a)^\beta e^{-\omega_n a i} + \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, 0, \beta-1,a,b) & \alpha = 0\\
+                        \frac{i}{\omega_n}(b-a)^\alpha e^{-\omega_nti} - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, 0,a,b) & \beta = 0\\
+                        \frac{\beta i}{\omega_n}\hat{Z}(\omega_n, \alpha, \beta-1, a, b) - \frac{\alpha i}{\omega_n}\hat{Z}(\omega_n, \alpha-1, \beta, a, b) & \text{otherwise}
+                    \end{cases}
+                    $$
+
+                    <h3>Fourier Transform of a Line</h3>
+                    Recall that our equation for a line is $f(t) = a + vt$. We therefore want to evaluate the following:
+                    $$
+                    \begin{align*}
+                    \hat{g}(\omega_n) = \int_{\frac{k}{N}}^{\frac{k+1}{N}} e^{-\omega_nti} \cdot f_k\left(\left(t - \frac{k}{N}\right) \cdot N\right) \mathrm{d}t &= \int_{\frac{k}{N}}^{\frac{k+1}{N}} e^{-\omega_nti} \cdot \left(a + v \cdot \left(\left(t - \frac{k}{N}\right) \cdot N\right)\right) \mathrm{d}t\\
+                    &= \int_{\frac{k}{N}}^{\frac{k+1}{N}} e^{-\omega_nti} \cdot \left(a + v \cdot \left(Nt - k\right)\right) \mathrm{d}t\\
+                    &= \int_{\frac{k}{N}}^{\frac{k+1}{N}} e^{-\omega_nti} \cdot \left(\left(a - vk\right) + vNt\right) \mathrm{d}t\\
+                    &= \int_{\frac{k}{N}}^{\frac{k+1}{N}} \left(a - vk\right)e^{-\omega_nti} \mathrm{d}t + \int_{\frac{k}{N}}^{\frac{k+1}{N}} vNt e^{-\omega_nti} \mathrm{d}t
+                    \end{align*}
+                    $$
+                    Then, using our pre-calculated itegrals we get:
+                    $$\hat{g}(\omega_n) = \hat{X}\left(\omega_n, a-vk, \frac{k}{N}, \frac{k+1}{N}\right) + \hat{Y}\left(\omega_n, vN, \frac{k}{N}, \frac{k+1}{N}\right)$$
+
+                    <h3>Fourier Transform of a Bezier Curve</h3>
+            </div>
+        </div>
+    </body>
+</html>

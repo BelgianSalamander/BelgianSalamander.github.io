@@ -151,3 +151,7 @@ body {
     padding-left: 1em;
     padding-right: 1em;
 }
+
+#main-content {
+    font-size: 1.1rem;
+}
