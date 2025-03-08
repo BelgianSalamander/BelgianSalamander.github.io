@@ -88,6 +88,13 @@ body {
     row-gap: 15px;
 }
 
+.accolade-container {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr;
+    row-gap: 15px;
+}
+
 .project-entry {
     display: grid;
 
@@ -100,24 +107,41 @@ body {
     padding: 25px;
 }
 
-.project-entry:nth-child(5n+1) {
+.accolade-entry {
+    min-height: 200px;
+
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.project-entry:nth-child(5n+1), .accolade-entry:nth-child(5n+4) {
     background-color: rgba(148, 247, 247, 0.548);
 }
 
-.project-entry:nth-child(5n+2) {
+.project-entry:nth-child(5n+2), .accolade-entry:nth-child(5n+1) {
     background-color: rgba(148, 247, 234, 0.548);
 }
 
-.project-entry:nth-child(5n+3) {
+.project-entry:nth-child(5n+3), .accolade-entry:nth-child(5n+5) {
     background-color: rgba(148, 219, 247, 0.548);
 }
 
-.project-entry:nth-child(5n+4) {
+.project-entry:nth-child(5n+4), .accolade-entry:nth-child(5n+3) {
     background-color: rgba(148, 247, 222, 0.548);
 }
 
-.project-entry:nth-child(5n+5) {
+.project-entry:nth-child(5n+5), .accolade-entry:nth-child(5n+2) {
     background-color: rgba(148, 247, 201, 0.548);
+}
+
+.accolade-entry h2 {
+    margin-top: 0;
+    margin-bottom: 0.2em;
+}
+
+.accolade-container ul {
+    margin-top: 0;
+    font-size: 1.2em;
 }
 
 .project-thumbnail {
@@ -161,4 +185,17 @@ mjx-container {
     overflow-y: hidden;
     padding-top: 5px;
     padding-bottom: 5px;
+}
+
+.accolade-entry li {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+.accolade-entry li a {
+    color: black;
+}
+
+.accolade-container h3 {
+    margin-bottom: 0.5em;
 }
