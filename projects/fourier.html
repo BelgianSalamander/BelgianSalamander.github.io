@@ -36,47 +36,48 @@
                     <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">3Blue1Brown's Video on Drawing with Circles</a>.
 
                     <h2>The Fourier Transform</h2>
-                    <h2>TODO: Use $n,m$ instead of $i,j$</h2>
-                    We can start by describing the movement of the circles mathematically. For each circle we need three values to describe it. Specifically, for the $i^\text{th}$ circle,
-                    we need its radius $r_i$, the integer frequency $f_i$ at which the next circle around it spins, and the starting angle $\theta_i$ of this next circle. This means that relative 
-                    to this circle, at time $t$, the next circle is positioned at:
-                    $$\left(r_i\cos\left(\theta_i + 2\pi tf_i\right),r_i\sin\left(\theta_i + 2\pi tf_i\right)\right)$$
+                    We can start by describing the movement of the circles mathematically. For each circle we need three values to describe it. Specifically, for the $n^\text{th}$ circle,
+                    we need its radius $r_n$, the integer frequency $f_n$ at which the next circle spins around it, and the starting angle $\theta_n$ of this next circle. This means that relative 
+                    to this circle, at time $t$, the next circle's centre is positioned at:
+                    $$\left(r_n\cos\left(\theta_n + 2\pi tf_n\right),r_n\sin\left(\theta_n + 2\pi tf_n\right)\right)$$
                     To get the position of the final circle in the chain we just need to add this up for all circles, meaning for some set of circles, the path we trace out will be the equation
                     below where $P(t)$ cna be thought of as a function that traces out the path over time, where $t \in (0, 1)$.
-                    $$P(t) = \left(\sum_i r_i\cos\left(\theta_i + 2\pi tf_i\right), \sum_i r_i\sin\left(\theta_i + 2\pi tf_i\right)\right)$$
+
+                    $$P(t) = \left(\sum_n r_n\cos\left(\theta_n + 2\pi tf_n\right), \sum_n r_n\sin\left(\theta_n + 2\pi tf_n\right)\right)$$
 
                     It turns out its easier if instead of thinking of the path we trace as a set of 2D points, we think of them as complex numbers. To formulate it this way, for each circle instead of
-                    using its radius $r_i$ and starting angle $\theta_i$, we just store its starting position $c_i = r_ie^{\theta_ii}$. Additionaly, instead of thinking of frequencies we will use angular
-                    velocities $\omega_i$ = $2\pi f_i$. Then, the equation above becomes
-                    $$P(t) = \sum_i c_ie^{\omega_iti}$$
+                    using its radius $r_n$ and starting angle $\theta_n$, we just store its starting position $c_i = r_ne^{\theta_ni}$. Additionaly, instead of thinking of frequencies we will use angular
+                    velocities $\omega_n$ = $2\pi f_n$. Then, the equation above becomes
+                    $$P(t) = \sum_n c_ne^{\omega_nti}$$
 
                     Now what we want to do is go the other way. We have a shape we want to draw (say a letter) which we can represent as a complex function of time $P(t)$.
                     Then, we need to find all the $c_i$. The way to do this is with a fourier transform. It turns out that:
-                    $$c_i = \int_0^1P(t) \cdot e^{-\omega_iti} \mathrm{d}t$$
+                    $$c_n = \int_0^1P(t) \cdot e^{-\omega_nti} \mathrm{d}t$$
                     We can prove this by splitting the $P(t)$ term as follows:
-                    $$\int_0^1\left(c_ie^{\omega_iti} + \sum_{j\neq i}c_je^{\omega_jti}\right)\cdot e^{-\omega_iti} \mathrm{d}t$$
-                    Then by ditributing the $e^{-\omega_iti}$ term and the integral we get
-                    $$\int_0^1c_ie^{\omega_iti}\cdot e^{-\omega_iti} \mathrm{d}t + \int_0^1\sum_{j\neq i}c_je^{\omega_jti}\cdot e^{-\omega_iti} \mathrm{d}t$$
+                    $$\int_0^1\left(c_ne^{\omega_nti} + \sum_{m\neq n}c_me^{\omega_mti}\right)\cdot e^{-\omega_nti} \mathrm{d}t$$
+                    Then by ditributing the $e^{-\omega_nti}$ term and the integral we get
+                    $$\int_0^1c_ne^{\omega_nti}\cdot e^{-\omega_nti} \mathrm{d}t + \int_0^1\sum_{m\neq n}c_me^{\omega_mti}\cdot e^{-\omega_nti} \mathrm{d}t$$
                     Combining exponential terms we get:
-                    $$\int_0^1 c_i e^0\mathrm{d}t + \int_0^1\sum_{j \neq i}c_j e^{\left(\omega_j - \omega_i\right)ti}\mathrm{d}t$$
-                    The first integral is just equal to $\int_0^1c_i\mathrm{d}t = c_i$. To evaluate the second integral, it  is useful to switch the order of the sum and the integral.
-                    $$c_i + \sum_{j\neq i}\int_0^1c_j e^{\left(\omega_j - \omega_i\right)ti}\mathrm{d}t$$
+                    $$\int_0^1 c_n e^0\mathrm{d}t + \int_0^1\sum_{m \neq n}c_m e^{\left(\omega_m - \omega_n\right)ti}\mathrm{d}t$$
+                    The first integral is just equal to $\int_0^1c_n\mathrm{d}t = c_n$. To evaluate the second integral, it is useful to switch the order of the sum and the integral.
+                    $$c_i + \sum_{m\neq n}\int_0^1c_m e^{\left(\omega_m - \omega_n\right)ti}\mathrm{d}t$$
                     This integral is quite easy to integrate
                     $$
                     \begin{align*}
-                         &c_i + \sum_{j \neq i}\left[\frac{1}{\left(\omega_j-\omega_i\right)i}\cdot e^{\left(\omega_j - \omega_i\right)ti}\right]_0^1\\
-                        =&c_i + \sum_{j \neq i}\frac{1}{\left(\omega_j-\omega_i\right)i} \cdot \left(e^{\left(\omega_j - \omega_i\right)i} - e^0\right)
+                         &c_n + \sum_{m \neq n}\left[\frac{1}{\left(\omega_m-\omega_n\right)i}\cdot e^{\left(\omega_m - \omega_n\right)ti}\right]_0^1\\
+                        =&c_n + \sum_{m \neq n}\frac{1}{\left(\omega_m-\omega_n\right)i} \cdot \left(e^{\left(\omega_m - \omega_n\right)i} - e^0\right)
                     \end{align*}
                     $$
-                    Recall that $w_x$ is just an integer multiple of $2\pi$. This means $\left(\omega_j-\omega_i\right)$ is also an integer multiple of $2\pi$. Hence $e^{\left(\omega_j - \omega_i\right)i}=1$ and we get
+                    Recall that $\omega_x$ is just an integer multiple of $2\pi$. This means $\left(\omega_m-\omega_n\right)$ is also an integer multiple of $2\pi$. Hence $e^{\left(\omega_m - \omega_n\right)i}=1$ and we get
                     $$
-                        c_i + \sum_{j \neq i} \frac{1}{\left(\omega_j-\omega_i\right)i} \cdot (1 - 1) = c_i + \sum_{i \neq j} 0 = c_i
+                        c_n + \sum_{m \neq n} \frac{1}{\left(\omega_m-\omega_n\right)i} \cdot (1 - 1) = c_n + \sum_{m \neq n} 0 = c_n
                     $$
                     And so we have shown that this fourier transform allows us to extract the values of $c_i$. This does seem to assume that all $P(t)$ can be represented 
-                    using an infinite sum of spinning circles. I am not completely sure how this is proven but it does appear to be true. 
+                    using an infinite sum of spinning circles. Reading <a href="https://en.wikipedia.org/wiki/Convergence_of_Fourier_series#Pointwise_convergence">this Wikipedia article</a> 
+                    we can show that we do get pointwise convergence of the fourier series to $P(t)$ for the speicifc class of functions we describe in the later sections.
                     
-                    <br><br>In practice, I cannot actually calculate the $c_i$ values for an infinite number of circles and then draw an infinite number of circles. However,
-                    for any reasonably behaved curve, the $c_i$ values quickly go to $0$ for large-ish $|\omega_i|$ and so if we only draw circles with $-50 \le \omega_i \le 50$
+                    <br><br>In practice, I cannot actually calculate the $c_n$ values for an infinite number of circles and then draw an infinite number of circles. However,
+                    for any reasonably behaved curve, the $c_n$ values quickly go to $0$ for large-ish $|\omega_n|$ and so if we only draw circles with $-50\pi \le \omega_n \le 50\pi$
                     we get a reasonably good approximation of our path $P(t)$.
 
                     <h2>Defining the Path</h2>
@@ -102,7 +103,10 @@
                     $$
                     Then, $P(t)$ just becomes the sum of all $g_k(t)$. So,
                     $$P(t) = \sum_{k=0}^{N-1}g_k(t)$$
-                    This representation makes it slightly easier to take the fourier transform.
+                    This representation makes it slightly easier to take the fourier transform. Since the fourier transform is a linear transformation, the fourier transform of $P(t)$ is:
+                    $$
+                        \hat{P}(t) = \sum_{k=0}^{N-1}\hat{g}_k(t)
+                    $$
 
                     <h2>Parametric Definitions of SVG Path Components</h2>
                     This section simply provides mathematical definitions for the $f_k(t)$ functions described above for each of the shapes required.
@@ -314,7 +318,7 @@
                     \end{align*}
                     $$
                     Then, using our pre-calculated itegrals we get:
-                    $$\hat{g}(\omega_n) = \hat{X}\left(\omega_n, a-vk, \frac{k}{N}, \frac{k+1}{N}\right) + \hat{Y}\left(\omega_n, vN, \frac{k}{N}, \frac{k+1}{N}\right)$$
+                    $$\hat{g}(\omega_n) = \left(a-vk\right)\hat{X}\left(\omega_n, \frac{k}{N}, \frac{k+1}{N}\right) + vN\hat{Y}\left(\omega_n, \frac{k}{N}, \frac{k+1}{N}\right)$$
 
                     <h3>Fourier Transform of a Bezier Curve</h3>
                     Recall that for a Bezier Curve we have:
@@ -361,7 +365,7 @@
                         3p_2\int_a^b (b-t)(t-a)^2e^{-\omega_nti} \mathrm{d}t + 
                         p_3\int_a^b (t-a)^3e^{-\omega_nti} \mathrm{d}t
                     \right)\\
-                    &= N^3 \left(p_0\hat{Z}(\omega_N,0,3,a,b)+3p_1\hat{Z}(\omega_N,1,2,a,b)+3p_2\hat{Z}(\omega_N,2,1,a,b)+p_3\hat{Z}(\omega_N,0,3,a,b)\right)
+                    &= N^3 \left(p_0\hat{Z}(\omega_N,0,3,a,b)+3p_1\hat{Z}(\omega_N,1,2,a,b)+3p_2\hat{Z}(\omega_N,2,1,a,b)+p_3\hat{Z}(\omega_N,3,0,a,b)\right)
                     \end{align*}
                     $$
                     <h3>Fourier Transform of an Arc</h3>
