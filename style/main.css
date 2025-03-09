@@ -199,3 +199,16 @@ mjx-container {
 .accolade-container h3 {
     margin-bottom: 0.5em;
 }
+
+.inline-code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eee;
+    border-radius: 5px;
+}
+
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eee;
+    border-radius: 5px;
+    padding: 1em;
+}

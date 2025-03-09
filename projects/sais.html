@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/style/main.css">
+        <title>Anatol Coen - Fourier Drawer</title>
+        <script>
+            MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ["\\(", "\\)"]],
+                processEscapes: true,
+              }
+            }
+        </script>
+          
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+    </head>
+    <body>
+        <div class="navbar">
+            <div>Anatol Coen</div>
+            <div class="under-construction">This Website is still Under Construction</div>
+            <div class = "navbar-links">
+                <a href = "/">About</a><a href = "/projects.html">Projects</a><a href = "/accolades.html">Accolades</a>
+            </div>
+        </div>
+        <div style="height:50px;"></div>
+        <div id="outer-container">
+            <div id="main-container">
+                <h1 class="title">SAIS</h1>
+                <hr>
+                <div id="main-content">
+                    SAIS (Short for Salamander's AI Session) is an activity I originally created for the New Zealand Olympiad in Informatics January Camp. The name SAIS is inspired
+                    by the Australian camp's version, <a href="https://github.com/aioc/phais">PHAIS</a>. The goal of SAIS is to create an agent to play some basic multiplayer game (for example,
+                    multiplayer snake). Then, you can submit your agent to the SAIS website and it will automatically pit it against other agents. On the SAIS website you can also spectate agents'
+                    games live and view a ranking of all the agents.
+                    <br><br>
+                    The whole SAIS framework is created to make it relatively easy to make your own games and not be limited to just snake.
+                    <br><br>
+                    SAIS is primarily written in Rust and when I crated it I explored various technologies and overall learnt a lot. These inlcude:
+                    <ul>
+                        <li>Tokenisation + Recusrive Descent Parsers</li>
+                        <li>Code Generation</li>
+                        <li>Executing untrusted code</li>
+                        <li>SQL Databases and ORMs</li>
+                        <li>Rust Async Code</li>
+                        <li>The HTTP Protocol</li>
+                        <li>Server-Sent Events</li>
+                    </ul>
+
+                    <h2>Some screenshots of SAIS</h2>
+                    <h3>Spectating Games</h3>
+                    <img src="/projects/images/sais/spectate-games.png" width="80%">
+                    <h3>The Leaderboard</h3>
+                    <img src="/projects/images/sais/leaderboard.png" width="80%">
+                    <h3>Submitting an Agent</h3>
+                    <img src="/projects/images/sais/submit-agent.png" width="80%">
+
+                    <h2>Recursive Descent Parsers? Why?</h2>
+                    As stated previously one goal of this project was to make it as easy as possible to implement your own games (so this project isn't restricted to just playing snake).
+                    The first step in creating a game is defining the interface the agents will need to implement. This is done in a <span class="inline-code">.game</span> file which looks like below:
+                    <pre class="code">type GridCell = i32;
+
+type Pos = struct {
+    row: u32,
+    col: u32
+};
+
+type Move = enum {
+    Up, Down, Left, Right
+};
+
+function init = (snake_id: GridCell, num_rows: u32, num_cols: u32, num_snakes: u32);
+
+function get_move = (grid: [[GridCell]], head: Pos) -> Move;</pre>
+                    The file above defines three types. A <span class="inline-code">GridCell</span> type which is actually just an integer in disguise. A <span class="inline-code">Pos</span> type
+                    with two member fields <span class="inline-code">row</span> and <span class="inline-code">col</span>, representing a pair of integer coordinates. And finally an enum type
+                    describing the possible moves a snake can do.
+
+                    <br><br>It also defines two functions that the agent must implement. An <span class="inline-code">init</span> function which presumably would be called at the start of a game,
+                    providing information like the size of the grid and the number of snakes playing ahead of time. Then there is the <span class="inline-code">get_move</span> function
+                    which would be called every game tick, giving the agent the state of the grid, and the position of its head and asking it to select a move to perform.
+
+                    <br><br>The structure of this file is very heavily inspired by the rust type system and is quite simple. Because of its simplicity, the entire tokenizer and parser for this file
+                    format is <a href="https://github.com/BelgianSalamander/ai_games/blob/master/gamedef/src/parser.rs">only about 400 lines of code.</a>
+
+                    <h2>Code Generation</h2>
+                    The information stored in these files is used to generate a lot of code, designed to speed up the process of implementing these games.
+
+                    <h3>Client-Side Code</h3>
+                    ...
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
