@@ -2,7 +2,8 @@
 <html>
     <head>
         <link rel="stylesheet" href="/style/main.css">
-        <title>Anatol Coen - Fourier Drawer</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
+        <title>Anatol Coen - SAIS</title>
         <script>
             MathJax = {
               tex: {
@@ -13,6 +14,7 @@
         </script>
           
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
         
     </head>
     <body>
@@ -84,12 +86,168 @@ function get_move = (grid: [[GridCell]], head: Pos) -> Move;</pre>
                     format is <a href="https://github.com/BelgianSalamander/ai_games/blob/master/gamedef/src/parser.rs">only about 400 lines of code.</a>
 
                     <h2>Code Generation</h2>
-                    The information stored in these files is used to generate a lot of code, designed to speed up the process of implementing these games.
+                    The information stored in these files is used to automatically generate a lot of code, in various different languages, designed to speed up the process of implementing these games.
 
                     <h3>Client-Side Code</h3>
-                    ...
+                    The only code any person "competing" on SAIS would see are the skeletons for implementing an agent. Firstly, all the type definitions are translated into suitable types
+                    in the required language. Currently, the only two supported languages are Python and C++. The C++ type definition for the file above would like below.
+                    <pre class="code"><code class="language-cpp">#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;array&gt;
+#include &lt;stdint.h&gt;
+
+
+typedef int32_t GridCell;
+
+struct Pos {
+    uint32_t row;
+    uint32_t col;
+};
+
+enum class Move : uint8_t {
+    Up,
+    Down,
+    Left,
+    Right,
+};</code></pre>
+                    Then, it generates a simple skeleton file for an agent implementation, like below.
+                    <pre class="code"><code class="language-cpp">#include "game_types.h"
+
+void init(GridCell& snake_id, uint32_t num_rows, uint32_t num_cols, uint32_t num_snakes) {
+    //Implement logic here...
+}
+
+Move get_move(std::vector&lt;std::vector&lt;GridCell&gt;&gt;& grid, Pos& head) {
+    //Implement logic here...
+    return Move::Up;
+}</code></pre>            
+                    <h3>Agent "Interactor"</h3>
+                    The server cannot directly interact with a program in the format above. All the agents are run as separate processes to the server so there needs to be a way for 
+                    the server and a running agent to communicate. This is where the "interactor" comes in. The interactor for C++ would look something like below (the version below is shortened quite a bit). It deserializes commands
+                    from the server and then serializes the results to send them back to the server. In the case of C++, the agent would be compiled against the interactor code.
+                    <pre class="code"><code class="language-cpp">#include "game.h"
+#include "interact_lib.hpp"
+
+/* Some (de)serialization helper methods defined here */
+
+int main(){
+    std::cerr &lt;&lt; "Starting Interactor!" &lt;&lt; std::endl;
+    while(true) {
+        uint8_t func_id;
+        readData&lt;uint8_t&gt;(func_id);
+        if (func_id == 0) { // init
+            std::cerr &lt;&lt; "Calling function init" &lt;&lt; std::endl;
+            GridCell param_snake_id;
+            read_GridCell(param_snake_id);
+            uint32_t param_num_rows;
+            readData&lt;uint32_t&gt;(param_num_rows);
+            uint32_t param_num_cols;
+            readData&lt;uint32_t&gt;(param_num_cols);
+            uint32_t param_num_snakes;
+            readData&lt;uint32_t&gt;(param_num_snakes);
+            
+            init(param_snake_id, param_num_rows, param_num_cols, param_num_snakes);
+        } else if (func_id == 1) { // get_move
+            std::cerr &lt;&lt; "Calling function get_move" &lt;&lt; std::endl;
+            std::vector&lt;std::vector&lt;GridCell&gt;&gt; param_grid;
+            uint32_t size_0;
+            readData&lt;uint32_t&gt;(size_0);
+            param_grid.resize(size_0);
+            for (int i = 0; i &lt; size_0; i++) {
+                std::vector&lt;GridCell&gt;& baseAddr_0 = param_grid[i];
+                uint32_t size_1;
+                readData&lt;uint32_t&gt;(size_1);
+                baseAddr_0.resize(size_1);
+                for (int i = 0; i &lt; size_1; i++) {
+                    GridCell& baseAddr_1 = baseAddr_0[i];
+                    read_GridCell(baseAddr_1);
+                }
+            }
+            Pos param_head;
+            read_Pos(param_head);
+            
+            Move ret = get_move(param_grid, param_head);
+            write_Move(ret);
+            flushStreams();
+        } 
+    }
+}</code></pre>
+                    For C++, a small <span class="inline-code">game.h</span> file is also created for a nicer compilation process.
+                    <pre class="code"><code class="language-cpp">#include "game_types.h"
+
+void init(GridCell& snake_id, uint32_t num_rows, uint32_t num_cols, uint32_t num_snakes);
+Move get_move(std::vector&lt;std::vector&lt;GridCell&gt;&gt;& grid, Pos& head);</code></pre>
+
+                    <h3>Server-side Interaction</h3>
+                    Now finally, we need the actual server code that is running the games to be able to smoothly interact with running agents. To do this, I leveraged the full power of rust's procedural
+                    macro system. With a single line of rust that looks like <span class="inline-code">make_server!("res/games/nzoi_snake.game");</span>, all the serialization logic is created and an 
+                    <span class="inline-code">Agent</span> struct is defined that allows you to easily call the functions an agent has defined. The <span class="inline-code">Agent</span> struct also
+                    makes full use of asynchronous rust. All of this means, that if you want to get the next move for a snake all you have to do is something like:
+                    <pre class="code"><code class="language-rust">let res = agent.get_move(&grid, &head).await;</code></pre>
+                    Of course a little bit more logic may be needed to add a time limit to the function call and to handle agents that crash, but overall it is still quite simple to use.
+                
+                    <h2>Executing Untrusted Code</h2>
+                    Executing untrusted code is at the core of this project. Students can submit any valid C++/Python program and it may be run. This typically poses a serious threat. However,
+                    there are already many pre-existing solutions.
+
+                    <br><br>I used the <a href="https://github.com/ioi/isolate" target="_blank">IOI Isolate</a> sandbox to solve this issue. The Isolate sandbox is maintained by
+                    Martin Mareš from the International Olympiad in Informatics' International Scientific Committee. It is used in the IOI and many other programming contests to run code students
+                    submit, so it seemed like the perfect option. It allows code to be run with very restricted permissions. Namely, the way I use it, when agents run they:
+                    <ul>
+                        <li>Cannot spawn subprocesses</li>
+                        <li>Cannot access the internet, or the server's local network</li>
+                        <li>Cannot read or create any files</li>
+                        <li>Can only use a limited amount of memory</li>
+                    </ul>
+                    Most of these are in fact default settings of the sandbox and would need to be explicitly disabled. That way, there isn't much of a risk of inadvertently disabling
+                    anything critical to the safety of the server.
+
+                    <h2>SQLite</h2>
+                    I used SQLite3 as a database to ensure that any data persists between program restarts. The database is quite simple, it stores only "users" and "agents".
+                    While the schema was quite simple I did end up using an ORM (sea-orm) which perhaps ended up being a little bit overkill.
+
+                    <h2>Asynchronous Rust Code</h2>
+                    The async engine I used was <span class="inline-code">async-std</span>. There wasn't much reason behind this, it just seemed like a reasonable choice. I did end up regretting this a little
+                    though. One of the main annoyances was that a lot of other async rust crates use <span class="inline-code">tokio</span> instead, which limited the number
+                    of creates I could use. Secondly, the facilities <span class="inline-code">async-std</span> has for reading/writing from files/pipes (for example, to communicate with agents) is rather
+                    limited. For example, the only method it seems to offer for reading is <a href="https://docs.rs/async-std/latest/async_std/io/trait.Read.html"><span class="inline-code">Read::poll_read(...)</span></a>
+                    does not actually return a future, so I ended up having to build my own future types around them. For example, my implementation for reading ended up looking like below.
+                    <pre class="code"><code class="language-rust">impl&lt;'data&gt; Future for ReadFuture&lt;'data&gt; {
+    type Output = Result&lt;(), Error&gt;;
+
+    fn poll(mut self: Pin&lt;&mut Self&gt;, cx: &mut std::task::Context&lt;'_&gt;) -&gt; std::task::Poll&lt;Self::Output&gt; {
+        if self.remaining == 0 { // If future was constructed to read 0 bytes
+            return std::task::Poll::Ready(Ok(()));
+        }
+
+        let res = {
+            let ReadFuture {ref stdout, ref mut data, ref pos, ref remaining} = &mut *self;
+            let mut stdout = stdout.lock().unwrap();
+            let pinned = Pin::new(&mut *stdout);
+            pinned.poll_read(cx, &mut data[*pos..*pos + *remaining])
+        };
+
+        match res {
+            std::task::Poll::Ready(Ok(0)) =&gt; std::task::Poll::Ready(Err(Error::new(ErrorKind::UnexpectedEof, "Unexpected EOF"))),
+            std::task::Poll::Ready(Ok(bytes)) =&gt; {
+                self.pos += bytes;
+                self.remaining -= bytes;
+                if self.remaining == 0 {
+                    std::task::Poll::Ready(Ok(()))
+                } else {
+                    cx.waker().wake_by_ref();
+                    std::task::Poll::Pending
+                }
+            },
+            std::task::Poll::Ready(Err(e)) =&gt; std::task::Poll::Ready(Err(e)),
+            std::task::Poll::Pending =&gt; std::task::Poll::Pending,
+        }
+    }
+}</code></pre>
+                    While I would have preferred to not have had to create futures like this, it definitely taught me a lot about asynchronous programming in rust.
                 </div>
             </div>
         </div>
+        <script>hljs.highlightAll();</script>
     </body>
 </html>
