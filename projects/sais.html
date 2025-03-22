@@ -19,7 +19,7 @@
     </head>
     <body>
         <div class="navbar">
-            <div>Anatol Coen</div>
+            <div><a href="/" style="text-decoration:none;color:#f5aeae;">Anatol Coen</a></div>
             <div class="under-construction">This Website is still Under Construction</div>
             <div class = "navbar-links">
                 <a href = "/">About</a><a href = "/projects.html">Projects</a><a href = "/accolades.html">Accolades</a>
@@ -89,7 +89,7 @@ function get_move = (grid: [[GridCell]], head: Pos) -> Move;</pre>
                     The information stored in these files is used to automatically generate a lot of code, in various different languages, designed to speed up the process of implementing these games.
 
                     <h3>Client-Side Code</h3>
-                    The only code any person "competing" on SAIS would see are the skeletons for implementing an agent. Firstly, all the type definitions are translated into suitable types
+                    The only generated code any person "competing" on SAIS would see are the skeletons for implementing an agent. Firstly, all the type definitions are translated into suitable types
                     in the required language. Currently, the only two supported languages are Python and C++. The C++ type definition for the file above would like below.
                     <pre class="code"><code class="language-cpp">#include &lt;vector&gt;
 #include &lt;string&gt;
@@ -244,7 +244,12 @@ Move get_move(std::vector&lt;std::vector&lt;GridCell&gt;&gt;& grid, Pos& head);<
         }
     }
 }</code></pre>
-                    While I would have preferred to not have had to create futures like this, it definitely taught me a lot about asynchronous programming in rust.
+                    While I would have preferred to not have had to create futures like this, it definitely taught me a lot about asynchronous programming in rust. I did later realise that somewhat simpler
+                    solution exists using <span class="inline-code">std::future::poll_fn()</span>.
+
+                    <h2>HTTP/SSE</h2>
+                    In part because I wanted to mess around with how HTTP works, no HTTP crate was used in this project. Instead, I handle it most of it myself. While this is definitely not the best
+                    way to do it in terms of guaranteed functionality, it has not failed my so far and it has been quite educational.
                 </div>
             </div>
         </div>

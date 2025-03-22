@@ -25,6 +25,8 @@ body {
 
     overflow-y: hidden;
     overflow-x: hidden;
+
+    padding-bottom: 3em;
 }
 
 .title {
@@ -170,8 +172,7 @@ body {
 }
 
 .under-construction {
-    background-color: red;
-    color: black;
+    color: red;
     padding-left: 1em;
     padding-right: 1em;
 }
