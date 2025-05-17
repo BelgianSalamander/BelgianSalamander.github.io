@@ -11,6 +11,10 @@
               }
             }
         </script>
+        <script src="/projects/fourier/ft.js"></script>
+        <script src="/projects/fourier/rendering.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js" integrity="sha512-Ro+jjHMdfC0ZYcLjWhxVxZtGWFbIGsfvZbVCU3EYCr/aP4dIyzHkSeuhF3wQHb43wz2UCs0M7o16+lAC3/muYA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="/projects/fourier/fourier-live.js"></script>
           
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         
@@ -26,14 +30,21 @@
         <div style="height:50px;"></div>
         <div id="outer-container">
             <div id="main-container">
-                <h1 class="title">Fourier Drawer &mdash; How does it work?</h1>
+                <h1 class="title">Fourier Drawer</h1>
                 <hr>
                 <div id="main-content">
+                    <h2>Live Demo</h2>
+
                     The Fourier Drawer is the animation that can be found on the <a href="/">main page of this website</a>. The animation consists of a chains of circles.
                     In each chain, each circle spins at a constant rate around the previous circle. By precisely tuning the size and starting position of each circle, we can 
                     control the shape the path of the smallest circle traces out. In the case of the main page, seven of these chains of circles draw out my name. This page 
                     will describe the methods and the maths behind determining the starting position and sizes of the circles. This was heavily inspired by 
-                    <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">3Blue1Brown's Video on Drawing with Circles</a>.
+                    <a href="https://www.youtube.com/watch?v=r6sGWTCMz2k">3Blue1Brown's Video on Drawing with Circles</a>.<br><br>
+
+                    Below is a live demo. Enter some text into the box below and watch it be drawn out by circles, just like on this website's main page. Here, the font used is Baumans from Google Fonts.
+
+                    <br><br><input type="text" id="fourier-text-input" placeholder = "Your text here!" oninput="updateLiveFourierText(this.value)">
+                    <canvas id = "canvas" width = 1980 height = 300 style = "width: 100%;"></canvas>
 
                     <h2>The Fourier Transform</h2>
                     We can start by describing the movement of the circles mathematically. For each circle we need three values to describe it. Specifically, for the $n^\text{th}$ circle,

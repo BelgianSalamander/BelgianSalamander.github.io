@@ -331,6 +331,12 @@ class WebGLFourierDrawer {
             y = ny;
         }
     }
+
+    free() {
+        this.gl.deleteBuffer(this.vertexBuffer);
+        this.gl.deleteBuffer(this.indexBuffer);
+        this.gl.deleteVertexArray(this.vertexArray);
+    }
 }
 
 function createShader(gl, type, source) {
@@ -427,6 +433,7 @@ const MAX_CIRCLES = 2000;
 class CircleDrawer {
     constructor(nPoints, gl, program) {
         this.nPoints = nPoints;
+        console.log("Creating circle drawer!");
 
         let {vertexData, indices} = createCircleMeshData(nPoints);
 
@@ -538,6 +545,8 @@ class CircleDrawer {
 
         this.gl.drawElementsInstanced(this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0, this.numCircles);
 
+        this.gl.bindVertexArray(null);
+
         this.numCircles = 0;
     }
 }
@@ -625,11 +634,15 @@ class CanvasFourierDrawingContext {
             }
         }
 
-        this.centerx = (this.maxx + this.miny) / 2;
+        this.centerx = (this.maxx + this.minx) / 2;
         this.centery = (this.maxy + this.miny) / 2;
     }
 
     setData(circles) {
+        for (const i in this.drawers) {
+            this.drawers[i].free();
+        }
+
         this.drawers = [];
 
         for (const i in circles) {
@@ -642,19 +655,23 @@ class CanvasFourierDrawingContext {
 
         this.recomputeBounds();
 
-        this.startOffsets = [];
-        for (const i in this.drawers) {
-            this.startOffsets.push(Math.random() * 0.3);
-        }
+        if (this.startOffsets === undefined || this.startOffsets.length != this.drawers.length) {
+            this.startOffsets = [];
+            for (const i in this.drawers) {
+                this.startOffsets.push(Math.random() * 0.3);
+            }
 
-        let minOffset = Math.min(...this.startOffsets);
-        for (const i in this.startOffsets) {
-            this.startOffsets[i] -= minOffset;
+            let minOffset = Math.min(...this.startOffsets);
+            for (const i in this.startOffsets) {
+                this.startOffsets[i] -= minOffset;
+            }
         }
     }
 
     draw(t) {
-        tryResizeCanvas(this.canvas);
+        if (tryResizeCanvas(this.canvas)) {
+            this.recomputeBounds();
+        }
 
         const canvasWidth = this.gl.canvas.width;
         const canvasHeight = this.gl.canvas.height;
@@ -662,9 +679,13 @@ class CanvasFourierDrawingContext {
         const widthFrac = (this.maxx - this.minx) / canvasWidth;
         const heightFrac = (this.maxy - this.miny) / canvasHeight;
 
-        const targetFrac = 0.75;
+        const targetVerticalFrac = 0.75;
+        const targetHorizontalFrac = 0.95;
 
-        const scale = targetFrac / Math.max(widthFrac, heightFrac);
+        const scale = Math.min(
+            targetHorizontalFrac / widthFrac,
+            targetVerticalFrac / heightFrac
+        );
 
         let secondaryOffset = [
             ((canvasWidth / 2) - this.centerx),
