@@ -50,7 +50,7 @@ async function updateLiveFourierText(newText, resetTime = true) {
         return;
     }
 
-    FREQ_RANGE = 20;
+    FREQ_RANGE = 30;
 
     const path = font.getPath(newText, 0, 0, 72);
     
