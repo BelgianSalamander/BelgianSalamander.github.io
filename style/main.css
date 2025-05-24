@@ -36,6 +36,35 @@ body {
     font-weight: bolder;
 }
 
+.socials {
+    /* Center this div horizontally within the available width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -2rem;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+    color: #f5aeae;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 10px;
+}
+
+.socials a {
+    text-decoration: none;
+}
+
+.social-icon {
+    width: 30px;
+    height: 30px;
+    vertical-align: middle;
+
+    /* The icons themselves are black SVGs, make them more colorful */
+    filter: invert(0.5) sepia(1) saturate(2) hue-rotate(270deg);
+}
+
 .navbar {
     position: fixed;
     display: flex;
@@ -88,6 +117,12 @@ body {
     grid-template-columns: 1fr 1fr;
     column-gap: 15px;
     row-gap: 15px;
+}
+
+@media screen and (max-width: 800px) {
+    .project-container {
+        grid-template-columns: 1fr;
+    }
 }
 
 .accolade-container {

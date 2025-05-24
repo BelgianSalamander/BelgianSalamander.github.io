@@ -5,7 +5,7 @@ window.onload = async () => {
     await fourierContext.loadShaders();
 
     let circleUrl = "/circles/anatol.json";
-    if (Math.random() < 0.5) {
+    if (Math.random() < 0.01) {
         circleUrl = "/circles/troll.json";
     }
 

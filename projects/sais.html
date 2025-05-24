@@ -4,6 +4,7 @@
         <link rel="stylesheet" href="/style/main.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css">
         <title>Anatol Coen - SAIS</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script>
             MathJax = {
               tex: {
@@ -20,7 +21,6 @@
     <body>
         <div class="navbar">
             <div><a href="/" style="text-decoration:none;color:#f5aeae;">Anatol Coen</a></div>
-            <div class="under-construction">This Website is still Under Construction</div>
             <div class = "navbar-links">
                 <a href = "/">About</a><a href = "/projects.html">Projects</a><a href = "/accolades.html">Accolades</a>
             </div>
@@ -34,13 +34,13 @@
                     SAIS (Short for Salamander's AI Session) is an activity I originally created for the New Zealand Olympiad in Informatics January Camp. The name SAIS is inspired
                     by the Australian camp's version, <a href="https://github.com/aioc/phais">PHAIS</a>. The goal of SAIS is to create an agent to play some basic multiplayer game (for example,
                     multiplayer snake). Then, you can submit your agent to the SAIS website and it will automatically pit it against other agents. On the SAIS website you can also spectate agents'
-                    games live and view a ranking of all the agents.
+                    games live and view a ranking of all the agents. The full source code for this project is available on <a href="https://github.com/BelgianSalamander/ai_games" target="_blank" rel="noreferrer">GitHub</a>.
                     <br><br>
                     The whole SAIS framework is created to make it relatively easy to make your own games and not be limited to just snake.
                     <br><br>
                     SAIS is primarily written in Rust and when I crated it I explored various technologies and overall learnt a lot. These inlcude:
                     <ul>
-                        <li>Tokenisation + Recusrive Descent Parsers</li>
+                        <li>Tokenisation + Recursive Descent Parsers</li>
                         <li>Code Generation</li>
                         <li>Executing untrusted code</li>
                         <li>SQL Databases and ORMs</li>
@@ -51,11 +51,17 @@
 
                     <h2>Some screenshots of SAIS</h2>
                     <h3>Spectating Games</h3>
-                    <img src="/projects/images/sais/spectate-games.png" width="80%">
+                    After writing and submitting your agent, you can watch it play live against other agents on the SAIS website. Here you can see a screenshot from a game between "Test Agent 1" and "Test Agent 2".
+                    Test Agent 1 has a score of 8 while Test Agent 2 has a score of 6.
+                    <br><br><img src="/projects/images/sais/spectate-games.png" width="80%">
                     <h3>The Leaderboard</h3>
-                    <img src="/projects/images/sais/leaderboard.png" width="80%">
+                    Every agent you submit is assigned a rating. After every game it plays, its rating is updated based on the results of the game. This system is inspired by the Elo rating system.
+                    Then, you can view the ranking of all the agents and (most importantly!) see who is first.
+                    <br><br><img src="/projects/images/sais/leaderboard.png" width="80%">
                     <h3>Submitting an Agent</h3>
-                    <img src="/projects/images/sais/submit-agent.png" width="80%">
+                    Here is the page where you actually submit your code. Currently the two supported languages are Python and C++. Then, you just name your agent and you're on your way!
+                    This code here is taken from one of my best snake-playing agents. For a more basic example of what an agent looks like, you can see the default agent <a href="#default-agent">below</a>.
+                    <br><br><img src="/projects/images/sais/submit-agent.png" width="80%">
 
                     <h2>Recursive Descent Parsers? Why?</h2>
                     As stated previously one goal of this project was to make it as easy as possible to implement your own games (so this project isn't restricted to just playing snake).
@@ -111,7 +117,7 @@ enum class Move : uint8_t {
     Right,
 };</code></pre>
                     Then, it generates a simple skeleton file for an agent implementation, like below.
-                    <pre class="code"><code class="language-cpp">#include "game_types.h"
+                    <pre class="code" id="default-agent"><code class="language-cpp">#include "game_types.h"
 
 void init(GridCell& snake_id, uint32_t num_rows, uint32_t num_cols, uint32_t num_snakes) {
     //Implement logic here...
@@ -244,12 +250,17 @@ Move get_move(std::vector&lt;std::vector&lt;GridCell&gt;&gt;& grid, Pos& head);<
         }
     }
 }</code></pre>
-                    While I would have preferred to not have had to create futures like this, it definitely taught me a lot about asynchronous programming in rust. I did later realise that somewhat simpler
+                    While I would have preferred to not have had to create futures like this, it definitely taught me a lot about asynchronous programming in rust. I did later realise that a somewhat simpler
                     solution exists using <span class="inline-code">std::future::poll_fn()</span>.
 
                     <h2>HTTP/SSE</h2>
-                    In part because I wanted to mess around with how HTTP works, no HTTP crate was used in this project. Instead, I handle it most of it myself. While this is definitely not the best
-                    way to do it in terms of guaranteed functionality, it has not failed my so far and it has been quite educational.
+                    For this project, the HTTP server was built from scratch (on top of TCP/IP). While this is definitely not the most efficient way to do it (and probably not the safest way),
+                    it was quite educational. Surprisingly, it was not too difficulty yo implement, it was only <a target="_blank" rel="noreferrer" href="https://github.com/BelgianSalamander/ai_games/blob/master/src/web/http.rs">about 850 lines of code</a> quite a few
+                    of which are just big match statements over all the possible response codes.
+
+                    <br><br>To allow users to see lives games, I originally used WebSockets. However, the way I had set it up, the websocket server would need to run separately on a different port to the HTTP server.
+                    This made it more difficult to set up port forwarding for the server, so I ended up just switching to Server-Sent Events (SSE), which ended up not being too difficult
+                    to implement on top of my HTTP setup. The only real difference is that you somehow need to keep the TCP connection alive for longer than you usually would.
                 </div>
             </div>
         </div>

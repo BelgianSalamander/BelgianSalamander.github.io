@@ -3,6 +3,7 @@
     <head>
         <link rel="stylesheet" href="/style/main.css">
         <title>Anatol Coen - Fourier Drawer</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script>
             MathJax = {
               tex: {
@@ -22,7 +23,6 @@
     <body>
         <div class="navbar">
             <div><a href="/" style="text-decoration:none;color:#f5aeae;">Anatol Coen</a></div>
-            <div class="under-construction">This Website is still Under Construction</div>
             <div class = "navbar-links">
                 <a href = "/">About</a><a href = "/projects.html">Projects</a><a href = "/accolades.html">Accolades</a>
             </div>
@@ -45,6 +45,8 @@
 
                     <br><br><input type="text" id="fourier-text-input" placeholder = "Your text here!" oninput="updateLiveFourierText(this.value)">
                     <canvas id = "canvas" width = 1980 height = 300 style = "width: 100%;"></canvas>
+
+                    The source code for all this can be found within the source code for this website, <a href="https://github.com/BelgianSalamander/BelgianSalamander.github.io/tree/main/projects/fourier">here!</a>. What follows now is my derivation of the fourier series used to draw the shapes and the mathematical definitions of the shapes themselves.
 
                     <h2>The Fourier Transform</h2>
                     We can start by describing the movement of the circles mathematically. For each circle we need three values to describe it. Specifically, for the $n^\text{th}$ circle,
@@ -229,7 +231,7 @@
                     $$
                     I = \hat{Z}(\omega_n, \alpha, \beta, a, b) = \int_a^b (t - a)^\alpha \cdot (b - t)^\beta \cdot e^{-\omega_nti} \mathrm{d}t
                     $$
-                    This is quite a complex integral and requires a lot of cases, integration by parts and recursive definitions. Let us start with the case $\omega_n, \alpha = 0$. Then,
+                    Unsurprisingly, this will come in useful when finding the fourier series of bezier curves. This is quite a complex integral and requires a lot of cases, integration by parts and recursive definitions. Let us start with the case $\omega_n, \alpha = 0$. Then,
                     $$
                     \hat{Z}(0, 0, \beta, a, b) = \int_a^b (b-t)^\beta \mathrm{d}{t} = \frac{-1}{\beta+1}\left[(b - t)^{\beta+1}\right]_a^b = \frac{-1}{\beta+1}\left(0 - (b-a)^{\beta+1}\right) = \frac{(b-a)^{\beta+1}}{\beta+1}
                     $$
