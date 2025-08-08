@@ -33,7 +33,7 @@
                 <h1 class="title">Rubik's Cube Solver</h1>
                 <hr>
                 <div id="main-content">
-                    This project was initially just an experiment to satisfy my curiosity about algorithms for programatically solving a Rubik's Cube, but it quickly grew in scope. I found myself
+                    This project was initially just an experiment to learn about algorithms for programmatically solving a Rubik's Cube, but it quickly grew in scope. I found myself
                     needing a good way to visualise and interact with the cube, so I built a 3D renderer and interface. Then, I wanted to be able to actually solve physical Rubik's Cubes, so I made my existing code work with a Lego EV3 robot (build instructions were found <a href="https://mindcuber.com/mindcub3r/mindcub3r.html#MindCub3rProgram">here</a>). Then, I found that
                     I couldn't reliably scan a cube with the robot, so instead implemented a way to scan a cube using OpenCV and a webcam.
                     <h2>Features</h2>
@@ -70,7 +70,7 @@
                     <ul>
                         <li>When the program starts, it does not know the orientation of the cube receptacle and of the arm. So, on startup, I automatically slowly move the arm back until some resistance is felt, and then I know the arm is fully retracted.</li>
                         <li>For the cube receptacle, the best solution I found to ensure it is properly aligned is to just get the user to rotate it until it is aligned, using the buttons found on the brick, when the program starts up.</li>
-                        <li>Because there is a little bit of extra space between the cube and the receptacle walls (because the cube is slightly smaller than the design intends), the cube doesn't turn exactly with the receptacle. If the turns were
+                        <li>Because there is a little bit of extra space between the cube and the receptacle walls (because the cube is slightly smaller than the original design intends, and it is hard to make the Lego be perfectly sized), the cube doesn't turn exactly with the receptacle. If the turns were
                             performed naively, this would result in turns not getting fully completed, which can mess up cube alignment later down the line and cause the robot to fail to perform some moves. The solution is actually quite simple: instead of 
                             just performing a 90 degree turn, I perform a 110 degree turn, which results in the move being completed, and then turning back 20 degrees. I have found this to be incredibly reliable.
                         <li>Quite a bit of fine-tuning had to go into the movement of the arm, to always ensure it fully grasped the cube, flipped the cube and retracted when needed.</li>
@@ -82,7 +82,7 @@
                     <h2>The Algorithm</h2>
                     The main algorithm I use to solve the cube is Kociemba's algorithm, which is well described on Herbert Kociembas <a href="https://kociemba.org/cube.htm">website</a>. I also implemented Korf's algorithm &mdash; it's purpose is just to find
                     a single, optimal solution. This can take a while. Instead Kociemba's algorithm is designed to find near-optimal solutions very quickly, and running it longer actually yields better solutions. If it is run for long enough, it will find an optimal solution, but this can take a while.
-                    <h2>The Interface:</h2>
+                    <h2>The Interface</h2>
                     <img src="/projects/images/rubik.png">
 
                     <h3>How to use</h3>
